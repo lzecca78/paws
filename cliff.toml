@@ -1,0 +1,32 @@
+[changelog]
+header = "## {{ version }} ({{ timestamp | date(format='%Y-%m-%d') }})"
+body = """
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group }}
+{% for commit in commits %}
+- {{ commit.message | trim }} ([#{{ commit.id | truncate(length=7, end="" }}]({{ commit.link }})){{ " – " ~ commit.author.name if commit.author.name }}
+{% endfor %}
+{% endfor %}
+"""
+footer = ""
+trim = true
+sort_commits = "oldest"
+
+[git]
+tag_pattern = "v[0-9]*"
+commit_parsers = [
+  { message = "^feat\\(.*\\):", group = "🎉 Features" },
+  { message = "^fix\\(.*\\):", group = "🐛 Bug Fixes" },
+  { message = "^docs\\(.*\\):", group = "📝 Documentation" },
+  { message = "^style\\(.*\\):", group = "💄 Style" },
+  { message = "^refactor\\(.*\\):", group = "♻️ Refactoring" },
+  { message = "^perf\\(.*\\):", group = "⚡ Performance" },
+  { message = "^test\\(.*\\):", group = "✅ Tests" },
+  { message = "^ci\\(.*\\):", group = "🧪 CI" },
+  { message = "^chore\\(.*\\):", group = "🧹 Chores" }
+]
+unmatched_group = "🪵 Other Changes"
+
+[remote.github]
+owner = "lzecca78"
+repo = "awsd"
