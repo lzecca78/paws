@@ -14,3 +14,7 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 bin/
+
+# Ignore git-cliff extracted binary and archive
+git-cliff-*.tar.gz
+git-cliff-*/
