@@ -39,13 +39,6 @@ func Execute() {
 	runRootCmd()
 }
 
-type PulumiConfig struct {
-	PulumiProjects map[string]string `mapstructure:"pulumi_projects"`
-}
-type PulumiStack struct {
-	Name string `json:"name"`
-}
-
 type AwsProfileSpec struct {
 	Profile     string
 	SsoStartURL string
