@@ -93,6 +93,9 @@ func (p *PulumiConfig) s3Login() error {
 
 func (p *PulumiConfig) Stacks() ([]string, error) {
 	output, err := executePulumiCommand("stack", "ls", "--json")
+	if err != nil {
+		logger.Errorf("Failed to list Pulumi stacks: %v", err)
+	}
 
 	var stacks []PulumiStack
 
