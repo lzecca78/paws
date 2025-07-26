@@ -27,7 +27,7 @@ checksum:
 
 release:
   github:
-    owner: lzecca
+    owner: lzecca78
     name: awsd
   draft: false
   prerelease: auto
