@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"github.com/radiusmethod/promptui"
 	"log"
 	"os"
 	"path/filepath"
@@ -94,4 +95,30 @@ func Contains(slice []string, str string) bool {
 		}
 	}
 	return false
+}
+
+func CreatePrompt(elements []string) (string, error) {
+	prompt := promptui.Select{
+		Label:        fmt.Sprintf(PromptColor, "Choose an element"),
+		Items:        elements,
+		HideHelp:     true,
+		HideSelected: true,
+		Templates: &promptui.SelectTemplates{
+			Label:    "{{ . }}?",
+			Active:   fmt.Sprintf("%s {{ . | cyan }}", promptui.IconSelect),
+			Inactive: "  {{.}}",
+			Selected: "  {{ . | cyan }}",
+		},
+		Searcher:          NewPromptUISearcher(elements),
+		StartInSearchMode: true,
+		Stdout:            &BellSkipper{},
+	}
+
+	_, result, err := prompt.Run()
+
+	if err != nil {
+		CheckError(err)
+		return "", nil
+	}
+	return result, nil
 }

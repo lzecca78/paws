@@ -1,0 +1,5 @@
+to be implemented:
+
+- logger package
+- extract functions
+- cleanup fmt.Printf calls

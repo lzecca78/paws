@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/radiusmethod/awsd/src/utils"
+	"github.com/lzecca78/awsd/src/utils"
 	"github.com/spf13/cobra"
 )
 
