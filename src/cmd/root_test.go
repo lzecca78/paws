@@ -34,15 +34,15 @@ func TestShouldRunDirectProfileSwitch(t *testing.T) {
 func TestRunProfileSwitcherWithPrompt(t *testing.T) {
 	mockLoadProfiles := func(path string) (*ini.File, error) {
 		cfg := ini.Empty()
-		cfg.NewSection("profile dev")
-		cfg.NewSection("profile staging")
+		_, _ = cfg.NewSection("profile dev")
+		_, _ = cfg.NewSection("profile staging")
 		return cfg, nil
 	}
 
 	mockLoadSSO := func(path string) (*ini.File, error) {
 		cfg := ini.Empty()
 		section, _ := cfg.NewSection("profile dev")
-		section.NewKey("sso_start_url", "https://example.com/sso")
+		_, _ = section.NewKey("sso_start_url", "https://example.com/sso")
 		return cfg, nil
 	}
 
