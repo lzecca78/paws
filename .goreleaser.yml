@@ -44,4 +44,4 @@ homebrew_casks:
     commit_msg_template: "Brew cask update for {{ .ProjectName }} version {{ .Tag }}"
     repository:
         owner: lzecca78
-        name: paws
+        name: homebrew-paws
