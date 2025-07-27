@@ -13,9 +13,9 @@ import (
 var cfgFile string
 
 var rootCmd = &cobra.Command{
-	Use:   "awsd",
-	Short: "awsd - switch between AWS profiles.",
-	Long:  "Allows for switching AWS profiles files.",
+	Use:   "paws",
+	Short: "paws - switch between AWS profiles and Pulumi stacks.",
+	Long:  "Allows for switching AWS profiles files and Pulumi stacks.",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		config.InitConfig(cfgFile)
 	},
