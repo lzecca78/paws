@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/lzecca78/awsd/src/config"
-	"github.com/lzecca78/awsd/src/logger"
-	"github.com/lzecca78/awsd/src/utils"
+	"github.com/lzecca78/paws/src/config"
+	"github.com/lzecca78/paws/src/logger"
+	"github.com/lzecca78/paws/src/utils"
 	"github.com/spf13/cobra"
 	"log"
 	"os"

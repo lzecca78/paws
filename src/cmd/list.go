@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"os"
 
-	"github.com/lzecca78/awsd/src/utils"
+	"github.com/lzecca78/paws/src/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -25,10 +27,21 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 }
 
-func runProfileLister() error {
+//	func runProfileLister() error {
+//		profiles := utils.GetProfiles()
+//		for _, p := range profiles {
+//			fmt.Println(p)
+//		}
+//		return nil
+//	}
+func runProfileListerToWriter(w io.Writer) error {
 	profiles := utils.GetProfiles()
 	for _, p := range profiles {
-		fmt.Println(p)
+		fmt.Fprintln(w, p)
 	}
 	return nil
+}
+
+var runProfileLister = func() error {
+	return runProfileListerToWriter(os.Stdout)
 }

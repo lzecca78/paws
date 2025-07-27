@@ -2,8 +2,8 @@ package utils
 
 import (
 	"encoding/json"
-	localconfig "github.com/lzecca78/awsd/src/config"
-	"github.com/lzecca78/awsd/src/logger"
+	localconfig "github.com/lzecca78/paws/src/config"
+	"github.com/lzecca78/paws/src/logger"
 	"github.com/spf13/viper"
 	"os"
 	"os/exec"
