@@ -29,12 +29,6 @@ Move the binary to a directory in your PATH, such as `/usr/local/bin`, and make 
 ```sh
 chmod +x /path/to/paws
 ```
-### Upgrading
-Upgrading consists of just doing a brew update and brew upgrade.
-
-```sh
-brew update && brew upgrade radiusmethod/awsd/awsd
-```
 
 ## Usage
 
