@@ -35,17 +35,13 @@ release:
 changelog:
   use: file
 
-brews:
+homebrew_casks:
   - name: paws
-    github:
-      owner: lzecca78
-      name: homebrew-paws
-    folder: Formula
-    homepage: 'https://gihub.com/lzecca78/paws'
-    description: 'paws is a CLI tool for AWS profile management and Pulumi login and stack selection.'
-    conflicts:
-      - paws
-    test: |
-      system "#{bin}/paws"
-    install: |
-      bin.install 'paws'
+    binary: paws
+    commit_author:
+      name: lzecca78
+      email: l.zecca78@gmail.com
+    commit_msg_template: "Brew cask update for {{ .ProjectName }} version {{ .Tag }}"
+    repository:
+        owner: lzecca78
+        name: paws
