@@ -23,7 +23,7 @@ paws is a command-line utility that allows you to easily switch between AWS Prof
 ## Installation
 
 ### Release Binaries
-You can download the latest release binaries from the Releases page on GitHub: [Releases](https://github.com/lzecca78/awsd/releases).
+You can download the latest release binaries from the Releases page on GitHub: [Releases](https://github.com/lzecca78/paws/releases).
 Move the binary to a directory in your PATH, such as `/usr/local/bin`, and make it executable:
 
 ```sh
