@@ -35,7 +35,7 @@ func init() {
 //		return nil
 //	}
 func runProfileListerToWriter(w io.Writer) error {
-	profiles := utils.GetProfiles()
+	profiles := utils.GetProfiles(utils.LoadINIFromPath)
 	for _, p := range profiles {
 		_, err := fmt.Fprintln(w, p)
 		if err != nil {

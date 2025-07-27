@@ -24,12 +24,17 @@ const (
 	defaultProfile = "default"
 )
 
-func GetProfiles() []string {
+func LoadINIFromPath(path string) (*ini.File, error) {
+	return ini.Load(path)
+}
+
+func GetProfiles(loadFunc func(string) (*ini.File, error)) []string {
 	profileFileLocation := GetCurrentProfileFile()
-	cfg, err := ini.Load(profileFileLocation)
+	cfg, err := loadFunc(profileFileLocation)
 	if err != nil {
 		log.Fatalf("Failed to load profiles: %v", err)
 	}
+
 	sections := cfg.SectionStrings()
 	profiles := make([]string, 0, len(sections)+1)
 	for _, section := range sections {
@@ -45,8 +50,15 @@ func GetProfiles() []string {
 }
 
 func GetSSOStartURL(profile string) (string, error) {
+	return GetSSOStartURLWithLoader(profile, LoadINIFromPath)
+}
+
+func GetSSOStartURLWithLoader(
+	profile string,
+	loadFunc func(string) (*ini.File, error),
+) (string, error) {
 	profileFileLocation := GetCurrentProfileFile()
-	cfg, err := ini.Load(profileFileLocation)
+	cfg, err := loadFunc(profileFileLocation)
 	if err != nil {
 		return "", fmt.Errorf("failed to load profile file: %w", err)
 	}

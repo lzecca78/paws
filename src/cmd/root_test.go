@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"gopkg.in/ini.v1"
 	"os"
 	"testing"
 
@@ -28,4 +29,29 @@ func TestShouldRunDirectProfileSwitch(t *testing.T) {
 			assert.Equal(t, tc.expected, shouldRunDirectProfileSwitch())
 		})
 	}
+}
+
+func TestRunProfileSwitcherWithPrompt(t *testing.T) {
+	mockLoadProfiles := func(path string) (*ini.File, error) {
+		cfg := ini.Empty()
+		cfg.NewSection("profile dev")
+		cfg.NewSection("profile staging")
+		return cfg, nil
+	}
+
+	mockLoadSSO := func(path string) (*ini.File, error) {
+		cfg := ini.Empty()
+		section, _ := cfg.NewSection("profile dev")
+		section.NewKey("sso_start_url", "https://example.com/sso")
+		return cfg, nil
+	}
+
+	mockPrompt := func(options []string) (string, error) {
+		return "dev", nil
+	}
+
+	result := runProfileSwitcherWithPrompt(mockPrompt, mockLoadProfiles, mockLoadSSO)
+
+	assert.Equal(t, "dev", result.Profile)
+	assert.Equal(t, "https://example.com/sso", result.SsoStartURL)
 }

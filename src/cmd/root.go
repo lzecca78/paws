@@ -6,6 +6,7 @@ import (
 	"github.com/lzecca78/paws/src/logger"
 	"github.com/lzecca78/paws/src/utils"
 	"github.com/spf13/cobra"
+	"gopkg.in/ini.v1"
 	"log"
 	"os"
 )
@@ -55,10 +56,10 @@ func init() {
 }
 
 func primaInitialize() error {
-	awsProfileSpec, err := runProfileSwitcher()
-	if err != nil {
-		return err
-	}
+	awsProfileSpec := runProfileSwitcherWithPrompt(
+		utils.CreatePrompt,
+		utils.LoadINIFromPath,
+		utils.LoadINIFromPath)
 	// execute aws sso login
 	awsSpec, err := utils.SSOLogin(awsProfileSpec.Profile, awsProfileSpec.SsoStartURL)
 	if err != nil {
@@ -69,23 +70,31 @@ func primaInitialize() error {
 	return utils.PulumiSetup(awsSpec)
 }
 
-func runProfileSwitcher() (awsProfileSpec AwsProfileSpec, error error) {
-	profiles := utils.GetProfiles()
+func runProfileSwitcherWithPrompt(
+	promptFn func([]string) (string, error),
+	profileLoader func(string) (*ini.File, error),
+	ssoLoader func(string) (*ini.File, error),
+) AwsProfileSpec {
+	profiles := utils.GetProfiles(profileLoader)
+
 	fmt.Printf(utils.NoticeColor, "PAWS Profile Switcher\n")
-	profile, err := utils.CreatePrompt(profiles)
+	profile, err := promptFn(profiles)
 	if err != nil {
-		return AwsProfileSpec{}, err
+		return AwsProfileSpec{}
 	}
+
 	fmt.Printf(utils.PromptColor, "Choose a profile")
 	fmt.Printf(utils.NoticeColor, "? ")
 	fmt.Printf(utils.CyanColor, profile)
 	fmt.Println()
-	ssoStartURI, err := utils.GetSSOStartURL(profile)
+
+	ssoStartURI, err := utils.GetSSOStartURLWithLoader(profile, ssoLoader)
 	if err != nil {
 		logger.Errorf("Failed to get SSO start URL for profile %s: %v", profile, err)
-		return AwsProfileSpec{}, err
+		return AwsProfileSpec{}
 	}
-	return AwsProfileSpec{Profile: profile, SsoStartURL: ssoStartURI}, utils.WriteFile(profile, utils.GetHomeDir())
+
+	return AwsProfileSpec{Profile: profile, SsoStartURL: ssoStartURI}
 }
 
 func shouldRunDirectProfileSwitch() bool {
@@ -94,7 +103,7 @@ func shouldRunDirectProfileSwitch() bool {
 }
 
 func directProfileSwitch(desiredProfile string) error {
-	profiles := utils.GetProfiles()
+	profiles := utils.GetProfiles(utils.LoadINIFromPath)
 	if utils.Contains(profiles, desiredProfile) {
 		printColoredMessage("Profile ", utils.PromptColor)
 		printColoredMessage(desiredProfile, utils.CyanColor)
