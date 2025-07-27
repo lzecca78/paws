@@ -13,7 +13,10 @@ import (
 func mockRunProfileListerToWriter(w io.Writer) error {
 	profiles := []string{"profile-a", "profile-b"}
 	for _, p := range profiles {
-		fmt.Fprintln(w, p)
+		_, err := fmt.Fprintln(w, p)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
