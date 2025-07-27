@@ -1,21 +1,17 @@
-# awsd - AWS Profile Switcher in Go
+# PAWS - Pulumi login and stack selector plus AWS Profile Switcher in Go
 
 ---
 
-<img src="assets/awsd.png" width="200">
+<img src="assets/paws.png" width="200">
 
-awsd is a command-line utility that allows you to easily switch between AWS Profiles.
-
-<img src="assets/demo.gif" width="500">
+paws is a command-line utility that allows you to easily switch between AWS Profiles and if a Pulumi project is detected, it will also allow you to login into the Pulumi state and select the stack you want to work with.
 
 ## Table of Contents
 
 - [Installation](#installation)
-    - [Homebrew](#homebrew)
-    - [Makefile](#makefile)
-    - [To Finish Installation](#to-finish-installation)
-    - [Upgrading](#upgrading)
+    - [Release Binaries](#release-binaries)
 - [Usage](#usage)
+    - [Pulumi configuration file](#pulumi-configuration-file)
     - [Switching AWS Profiles](#switching-aws-profiles)
     - [Persist Profile across new shells](#persist-profile-across-new-shells)
     - [Show your AWS Profile in your shell prompt](#show-your-aws-profile-in-your-shell-prompt)
@@ -26,30 +22,13 @@ awsd is a command-line utility that allows you to easily switch between AWS Prof
 
 ## Installation
 
-Make sure you have Go installed. You can download it from [here](https://golang.org/dl/).
-
-### Homebrew
-
-```sh
-brew tap radiusmethod/awsd
-brew install awsd
-```
-
-### Makefile
+### Release Binaries
+You can download the latest release binaries from the Releases page on GitHub: [Releases](https://github.com/lzecca78/awsd/releases).
+Move the binary to a directory in your PATH, such as `/usr/local/bin`, and make it executable:
 
 ```sh
-make install
+chmod +x /path/to/paws
 ```
-
-### To Finish Installation
-Add the following to your bash profile or zshrc then open new terminal or source that file
-
-```sh
-alias awsd="source _awsd"
-```
-
-Ex. `echo 'alias awsd="source _awsd"' >> ~/.zshrc`
-
 ### Upgrading
 Upgrading consists of just doing a brew update and brew upgrade.
 
@@ -59,82 +38,43 @@ brew update && brew upgrade radiusmethod/awsd/awsd
 
 ## Usage
 
+### Pulumi configuration file
+
+If you want to use the Pulumi functionality, you need to have a `.pulumi_config.yaml` file in your home directory. This file will be use to bind the aws account id to the bucket name where the Pulumi state is stored. The file should look like this:
+
+```yaml
+pulumi_projects:
+    "0123456789012": "my-pulumi-bucket"
+    "1234567890123": "my-other-pulumi-bucket"
+    "234567890123": "my-third-pulumi-bucket"
+```    
+
 ### Switching AWS Profiles
 
 It is possible to shortcut the menu selection by passing the profile name you want to switch to as an argument.
 
 ```bash
-> awsd work
+> paws work
 Profile work set.
 ```
 
 To switch between different profiles files using the menu, use the following command:
 
 ```bash
-awsd
+paws
 ```
 
 This command will display a list of available profiles files in your `~/.aws/config` file or from `AWS_CONFIG_FILE`
 if you have that set. It expects for you to have named profiles in your AWS config file. Select the one you want to use.
-
-### Persist Profile across new shells
-To persist the set profile when you open new terminal windows, you can add the following to your bash profile or zshrc.
-
-```bash
-export AWS_PROFILE=$(cat ~/.awsd)
-```
-
-### Show your AWS Profile in your shell prompt
-For better visibility into what your shell is set to it can be helpful to configure your prompt to show the value of the env variable `AWS_PROFILE`.
-
-<img src="assets/screenshot.png" width="700">
-
-Here's a sample of my zsh prompt config using oh-my-zsh themes
-
-```sh
-# AWS info
-local aws_info='$(aws_prof)'
-function aws_prof {
-  local profile="${AWS_PROFILE:=}"
-  echo -n "%{$fg_bold[blue]%}aws:(%{$fg[cyan]%}${profile}%{$fg_bold[blue]%})%{$reset_color%} "
-}
-```
-
-```sh
-PROMPT='OTHER_PROMPT_STUFF $(aws_info)'
-```
-
-### Add autocompletion
-You can add autocompletion when passing config as argument by adding the following to your bash profile or zshrc file.
-`source _awsd_autocomplete`
-
-```bash
-[ "$BASH_VERSION" ] && AWSD_CMD="awsd" || AWSD_CMD="_awsd"
-_awsd_completion() {
-    local cur=${COMP_WORDS[COMP_CWORD]}
-    local suggestions=$(awsd list)
-    COMPREPLY=($(compgen -W "$suggestions" -- $cur))
-    return 0
-}
-complete -o nospace -F _awsd_completion "${AWSD_CMD}"
-```
-
-Now you can do `awsd my-p` and hit tab and if you had a profile `my-profile` it would autocomplete and find it.
-
-### TL;DR (full config example)
-```bash
-alias awsd="source _awsd"
-source _awsd_autocomplete
-export AWS_PROFILE=$(cat ~/.awsd)
-```
+Furthermore, if a `Pulumi.yaml` file is detected in the current directory, it will also login to the Pulumi state and allow you to select the stack you want to work with.
 
 ## Contributing
 
-If you encounter any issues or have suggestions for improvements, please open an issue or create a pull request on [GitHub](https://github.com/radiusmethod/awsd).
+If you encounter any issues or have suggestions for improvements, please open an issue or create a pull request on [GitHub](https://github.com/lzecca78/awsd).
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
-Inspired by https://github.com/johnnyopao/awsp
+Inspired by https://github.com/radiusmethod/awsd

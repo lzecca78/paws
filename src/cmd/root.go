@@ -71,7 +71,7 @@ func primaInitialize() error {
 
 func runProfileSwitcher() (awsProfileSpec AwsProfileSpec, error error) {
 	profiles := utils.GetProfiles()
-	fmt.Printf(utils.NoticeColor, "AWS Profile Switcher\n")
+	fmt.Printf(utils.NoticeColor, "PAWS Profile Switcher\n")
 	profile, err := utils.CreatePrompt(profiles)
 	if err != nil {
 		return AwsProfileSpec{}, err

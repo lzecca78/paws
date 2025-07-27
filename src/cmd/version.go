@@ -11,7 +11,7 @@ var versionCmd = &cobra.Command{
 	Use:     "version",
 	Short:   "awsd version command",
 	Aliases: []string{"v"},
-	Long:    "Returns the current version of awsd",
+	Long:    "Returns the current version of paws",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("awsd version:", version)
 	},
