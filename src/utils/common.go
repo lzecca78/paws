@@ -17,14 +17,14 @@ func TouchFile(name string) error {
 }
 
 func WriteFile(config, loc string) error {
-	if err := TouchFile(fmt.Sprintf("%s/.awsd", GetHomeDir())); err != nil {
+	if err := TouchFile(fmt.Sprintf("%s/.paws", GetHomeDir())); err != nil {
 		return err
 	}
 	s := []byte("")
 	if config != "default" {
 		s = []byte(config)
 	}
-	err := os.WriteFile(fmt.Sprintf("%s/.awsd", loc), s, 0644)
+	err := os.WriteFile(fmt.Sprintf("%s/.paws", loc), s, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
