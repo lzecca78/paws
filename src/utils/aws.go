@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	localconfig "github.com/lzecca78/paws/src/config"
 	"github.com/lzecca78/paws/src/logger"
+	"github.com/spf13/afero"
 	"gopkg.in/ini.v1"
 	"log"
 	"os"
@@ -49,10 +50,6 @@ func GetProfiles(loadFunc func(string) (*ini.File, error)) []string {
 	return profiles
 }
 
-func GetSSOStartURL(profile string) (string, error) {
-	return GetSSOStartURLWithLoader(profile, LoadINIFromPath)
-}
-
 func GetSSOStartURLWithLoader(
 	profile string,
 	loadFunc func(string) (*ini.File, error),
@@ -77,9 +74,9 @@ func GetSSOStartURLWithLoader(
 	return ssoStartURL, nil
 }
 
-func SSOLogin(profile, ssoStartUri string) (awsSpec localconfig.AwsGetCallerIdentitySpec, err error) {
+func SSOLogin(fs afero.Fs, profile, ssoStartUri string) (awsSpec localconfig.AwsGetCallerIdentitySpec, err error) {
 	logger.Info("Running AWS SSO login...")
-	ok, err := IsSSOTokenValid(ssoStartUri, 15)
+	ok, err := IsSSOTokenValid(fs, ssoStartUri, 15)
 	if err != nil {
 		logger.Errorf("Failed to check SSO token validity: %v", err)
 	}
@@ -106,16 +103,24 @@ func RunSSOLogin(profile string, cli bool) (localconfig.AwsGetCallerIdentitySpec
 	logger.Infof("Running SSO login for profile: %s", profile)
 
 	if cli {
-
-		cmd := exec.Command("aws", "sso", "login", "--profile", profile)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		if err := cmd.Run(); err != nil {
-			logger.Errorf("Failed ")
-			return localconfig.AwsGetCallerIdentitySpec{}, fmt.Errorf("failed to run aws sso login: %w", err)
+		logger.Infof("Executing AWS SSO login command for profile: %s", profile)
+		command := ExecuteAwsSSOCommander(profile)
+		output, err := ExecuteAwsSSoCommand(command)
+		if err != nil {
+			logger.Errorf("Failed to execute AWS SSO command: %v\nOutput: %s", err, output)
+			return localconfig.AwsGetCallerIdentitySpec{}, fmt.Errorf("failed to execute AWS SSO command: %w", err)
 		}
 	}
+
+	//	cmd := exec.Command("aws", "sso", "login", "--profile", profile)
+	//	cmd.Stdout = os.Stdout
+	//	cmd.Stderr = os.Stderr
+	//	cmd.Stdin = os.Stdin
+	//	if err := cmd.Run(); err != nil {
+	//		logger.Errorf("Failed ")
+	//		return localconfig.AwsGetCallerIdentitySpec{}, fmt.Errorf("failed to run aws sso login: %w", err)
+	//	}
+	//}
 
 	cfg, err := config.LoadDefaultConfig(
 		context.TODO(),
@@ -155,14 +160,30 @@ func RunSSOLogin(profile string, cli bool) (localconfig.AwsGetCallerIdentitySpec
 
 }
 
+func ExecuteAwsSSOCommander(profile string) IShellCommand {
+	cmd := exec.Command("aws", "sso", "login", "--profile", profile)
+	logger.Infof("Running AWS SSO command: %s", cmd.String())
+	return &execShellCommand{Cmd: cmd}
+}
+
+func ExecuteAwsSSoCommand(command IShellCommand) ([]byte, error) {
+	output, err := command.CombinedOutput()
+	if err != nil {
+		logger.Errorf("Failed to execute AWS SSO command: %v\nOutput: %s", err, output)
+		return nil, fmt.Errorf("failed to execute AWS SSO command: %w", err)
+	}
+	logger.Infof("AWS SSO command output: %s", output)
+	return output, nil
+}
+
 type SSOToken struct {
 	StartURL  string `json:"startUrl"`
 	ExpiresAt string `json:"expiresAt"`
 }
 
-func IsSSOTokenValid(ssoStartUri string, threshold time.Duration) (bool, error) {
+func IsSSOTokenValid(fs afero.Fs, ssoStartUri string, threshold time.Duration) (bool, error) {
 	cacheDir := filepath.Join(os.Getenv("HOME"), ".aws", "sso", "cache")
-	entries, err := os.ReadDir(cacheDir)
+	entries, err := afero.ReadDir(fs, cacheDir)
 	if err != nil {
 		return false, fmt.Errorf("failed to read SSO cache dir: %w", err)
 	}
@@ -175,7 +196,7 @@ func IsSSOTokenValid(ssoStartUri string, threshold time.Duration) (bool, error) 
 
 		fullPath := filepath.Join(cacheDir, entry.Name())
 
-		data, err := os.ReadFile(fullPath)
+		data, err := afero.ReadFile(fs, fullPath)
 		if err != nil {
 			continue
 		}
@@ -186,11 +207,11 @@ func IsSSOTokenValid(ssoStartUri string, threshold time.Duration) (bool, error) 
 		}
 
 		if token.StartURL == "" || token.ExpiresAt == "" {
-			continue // likely not a user session token
+			continue
 		}
 
 		if token.StartURL != ssoStartUri {
-			continue // skip tokens that do not match the specified start URL
+			continue
 		}
 
 		expiresAt, err := time.Parse(time.RFC3339, token.ExpiresAt)
@@ -200,10 +221,10 @@ func IsSSOTokenValid(ssoStartUri string, threshold time.Duration) (bool, error) 
 
 		if expiresAt.After(now.Add(threshold)) {
 			logger.Infof("Found valid SSO token in file %s with expiration at %s", entry.Name(), expiresAt)
-			return true, nil // found one valid token
+			return true, nil
 		}
 	}
-	logger.Infof("No valid SSO tokens found for start URL: %s", ssoStartUri)
 
-	return false, nil // no valid tokens found
+	logger.Infof("No valid SSO tokens found for start URL: %s", ssoStartUri)
+	return false, nil
 }

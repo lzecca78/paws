@@ -8,29 +8,6 @@ import (
 	"path/filepath"
 )
 
-func TouchFile(name string) error {
-	file, err := os.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
-	return file.Close()
-}
-
-func WriteFile(config, loc string) error {
-	if err := TouchFile(fmt.Sprintf("%s/.awsd", GetHomeDir())); err != nil {
-		return err
-	}
-	s := []byte("")
-	if config != "default" {
-		s = []byte(config)
-	}
-	err := os.WriteFile(fmt.Sprintf("%s/.awsd", loc), s, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return nil
-}
-
 func GetEnv(key, fallback string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {
@@ -58,25 +35,8 @@ func GetHomeDir() string {
 	return homeDir
 }
 
-func GetProfileFileLocation() string {
-	configFileLocation := filepath.Join(GetHomeDir(), ".aws")
-	if IsDirectoryExists(configFileLocation) {
-		return filepath.Join(configFileLocation)
-	}
-	log.Fatalf("~/.aws directory does not exist!")
-	return ""
-}
-
 func GetCurrentProfileFile() string {
 	return GetEnv("AWS_CONFIG_FILE", filepath.Join(GetHomeDir(), ".aws/config"))
-}
-
-func IsDirectoryExists(path string) bool {
-	info, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return info.IsDir()
 }
 
 func AppendIfNotExists(slice []string, s string) []string {

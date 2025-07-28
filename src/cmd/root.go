@@ -5,6 +5,7 @@ import (
 	"github.com/lzecca78/paws/src/config"
 	"github.com/lzecca78/paws/src/logger"
 	"github.com/lzecca78/paws/src/utils"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"gopkg.in/ini.v1"
 	"log"
@@ -32,7 +33,8 @@ func Execute() {
 	if shouldRunDirectProfileSwitch() {
 		profile := os.Args[1]
 		config.InitConfig(cfgFile)
-		if err := directProfileSwitch(profile); err != nil {
+		fs := afero.NewOsFs()
+		if err := directProfileSwitch(fs, profile, utils.LoadINIFromPath); err != nil {
 			log.Fatal(err)
 		}
 		return
@@ -61,13 +63,14 @@ func primaInitialize() error {
 		utils.LoadINIFromPath,
 		utils.LoadINIFromPath)
 	// execute aws sso login
-	awsSpec, err := utils.SSOLogin(awsProfileSpec.Profile, awsProfileSpec.SsoStartURL)
+	fs := afero.NewOsFs()
+	awsSpec, err := utils.SSOLogin(fs, awsProfileSpec.Profile, awsProfileSpec.SsoStartURL)
 	if err != nil {
 		logger.Errorf("Failed to run AWS SSO login: %v", err)
 		return err
 	}
 
-	return utils.PulumiSetup(awsSpec)
+	return utils.PulumiSetup(fs, awsSpec)
 }
 
 func runProfileSwitcherWithPrompt(
@@ -102,29 +105,29 @@ func shouldRunDirectProfileSwitch() bool {
 	return len(os.Args) > 1 && !utils.Contains(invalidProfiles, os.Args[1])
 }
 
-func directProfileSwitch(desiredProfile string) error {
-	profiles := utils.GetProfiles(utils.LoadINIFromPath)
+func directProfileSwitch(
+	fs afero.Fs,
+	desiredProfile string,
+	profileLoader func(string) (*ini.File, error),
+
+) error {
+	profiles := utils.GetProfiles(profileLoader)
 	if utils.Contains(profiles, desiredProfile) {
 		printColoredMessage("Profile ", utils.PromptColor)
 		printColoredMessage(desiredProfile, utils.CyanColor)
 		printColoredMessage(" set.\n", utils.PromptColor)
-		ssu, err := utils.GetSSOStartURL(desiredProfile)
+		ssu, err := utils.GetSSOStartURLWithLoader(desiredProfile, profileLoader)
 		if err != nil {
 			logger.Errorf("Failed to get SSO start URL for profile %s: %v", desiredProfile, err)
 			return err
 		}
-
-		awsSpec, err := utils.SSOLogin(desiredProfile, ssu)
+		awsSpec, err := utils.SSOLogin(fs, desiredProfile, ssu)
 		if err != nil {
 			logger.Errorf("Failed to run AWS SSO login: %v", err)
 			return err
 		}
-		err = utils.PulumiSetup(awsSpec)
-		if err != nil {
-			logger.Errorf("Failed to setup Pulumi: %v", err)
-			return err
-		}
-		return utils.WriteFile(desiredProfile, utils.GetHomeDir())
+		return utils.PulumiSetup(fs, awsSpec)
+
 	}
 	printColoredMessage("WARNING: Profile ", utils.NoticeColor)
 	printColoredMessage(desiredProfile, utils.CyanColor)

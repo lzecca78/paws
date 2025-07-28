@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	localconfig "github.com/lzecca78/paws/src/config"
 	"github.com/lzecca78/paws/src/logger"
+	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"os"
 	"os/exec"
@@ -13,14 +14,16 @@ import (
 type PulumiConfig struct {
 	PulumiProjects map[string]string                    `mapstructure:"pulumi_projects"`
 	AwsSpec        localconfig.AwsGetCallerIdentitySpec `mapstructure:"aws_spec"`
+	FileSystem     afero.Fs
 }
 type PulumiStack struct {
 	Name string `json:"name"`
 }
 
-func PulumiSetup(awsSpec localconfig.AwsGetCallerIdentitySpec) error {
+func PulumiSetup(fs afero.Fs, awsSpec localconfig.AwsGetCallerIdentitySpec) error {
 	var pConfig PulumiConfig
 	pConfig.AwsSpec = awsSpec
+	pConfig.FileSystem = fs
 	if ok, err := pConfig.checkYaml(); !ok || err != nil {
 		return err
 	}
@@ -44,7 +47,8 @@ func PulumiSetup(awsSpec localconfig.AwsGetCallerIdentitySpec) error {
 			logger.Errorf("Failed to create prompt for stacks: %v", err)
 			return err
 		}
-		_, err = executePulumiCommand("stack", "select", stack)
+		commander := executePulumiCommander("stack", "select", stack)
+		_, err = executePulumiCommand(commander)
 		if err != nil {
 			logger.Errorf("Failed to select Pulumi stack: %v", err)
 
@@ -63,7 +67,7 @@ func (p *PulumiConfig) checkYaml() (ok bool, err error) {
 		return false, err
 	}
 	pulumiFilePath := filepath.Join(currentDir, "Pulumi.yaml")
-	if _, err := os.Stat(pulumiFilePath); err != nil {
+	if _, err := p.FileSystem.Stat(pulumiFilePath); err != nil {
 		logger.Warnf("Pulumi.yaml file not found in current directory: %s", currentDir)
 		return false, nil
 	}
@@ -86,13 +90,14 @@ func (p *PulumiConfig) s3Login() error {
 	if bucketName == "" {
 		logger.Errorf("No s3 Bucket configured for the selected AWS profile %s", os.Getenv("AWS_PROFILE"))
 	}
-
-	_, err := executePulumiCommand("login", "s3://"+bucketName)
+	commander := executePulumiCommander("login", "s3://"+bucketName)
+	_, err := executePulumiCommand(commander)
 	return err
 }
 
 func (p *PulumiConfig) Stacks() ([]string, error) {
-	output, err := executePulumiCommand("stack", "ls", "--json")
+	commander := executePulumiCommander("stack", "ls", "--json")
+	output, err := executePulumiCommand(commander)
 	if err != nil {
 		logger.Errorf("Failed to list Pulumi stacks: %v", err)
 	}
@@ -113,20 +118,34 @@ func (p *PulumiConfig) Stacks() ([]string, error) {
 	return currentStacks, nil
 }
 
-func executePulumiCommand(args ...string) ([]byte, error) {
+type IShellCommand interface {
+	Run() error
+	CombinedOutput() ([]byte, error)
+}
+type execShellCommand struct {
+	*exec.Cmd
+}
+
+func executePulumiCommander(args ...string) IShellCommand {
 	cmd := exec.Command("pulumi", args...)
 	logger.Infof("Running pulumi %s command: %s", args[0], cmd.String())
 	currentDir, err := os.Getwd()
 	if err != nil {
 		logger.Errorf("Failed to get current directory: %v", err)
-		return nil, err
+		return nil
 	}
 	cmd.Dir = currentDir
-	output, err := cmd.CombinedOutput()
+	return &execShellCommand{Cmd: cmd}
+}
+
+func executePulumiCommand(command IShellCommand) ([]byte, error) {
+
+	// Run the command and capture the output
+	output, err := command.CombinedOutput()
 	if err != nil {
-		logger.Errorf("Error running pulumi %s command: %v\nOutput: %s", args[0], err, output)
+		logger.Errorf("Error running pulumi command: %v\nOutput: %s", err, output)
 		return nil, err
 	}
-
 	return output, nil
+
 }
