@@ -27,6 +27,15 @@ brew tap lzecca78/paws
 brew install paws
 ```
 
+Add this alias to your shell configuration file (e.g., `.bashrc`, `.zshrc`, etc.):
+
+```sh
+alias paws="source _paws"
+
+```
+
+This will rely on [this](./scripts/_paws) script to set up the environment variables and run the `paws` command.
+
 > ⚠️ **macOS Gatekeeper Warning**
 > 
 > The Homebrew tap is not signed, so you may need to allow it to run in your macOS security settings. If you encounter an error when trying to run the command, go to `System Preferences > Security & Privacy` and allow the app to run.
