@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# check if $1 is empty
+if [ -z "$1" ]
+then
+  # no argument passed
+  AWS_PROFILE="$AWS_PROFILE" paws
+else
+  # argument passed, assume it's a profile name
+  AWS_PROFILE="$AWS_PROFILE" paws "$@"
+fi
+
+touch ~/.paws
+selected_profile="$(cat ~/.paws)"
+
+if [ -z "$selected_profile" ]
+then
+  unset AWS_PROFILE
+else
+  export AWS_PROFILE="$selected_profile"
+fi

@@ -14,10 +14,6 @@ paws is a command-line utility that allows you to easily switch between AWS Prof
 - [Usage](#usage)
     - [Pulumi configuration file](#pulumi-configuration-file)
     - [Switching AWS Profiles](#switching-aws-profiles)
-    - [Persist Profile across new shells](#persist-profile-across-new-shells)
-    - [Show your AWS Profile in your shell prompt](#show-your-aws-profile-in-your-shell-prompt)
-    - [Add autocompletion](#add-autocompletion)
-    - [TL;DR (full config example)](#tldr-full-config-example)
 - [Contributing](#contributing)
 - [License](#license)
 
