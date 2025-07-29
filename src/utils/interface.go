@@ -22,6 +22,7 @@ type Utils interface {
 	WriteFile(loc string) error
 	NewShellCommand(name string, args ...string) IShellCommand
 	GetCallerIdentity() (localconfig.AwsGetCallerIdentitySpec, error)
+	GetSSOUrl() string
 }
 
 type Spec struct {
@@ -38,6 +39,10 @@ func (u *Spec) SetProfile(profile string) {
 
 func (u *Spec) GetProfiles() []string {
 	return u.GetAWSProfiles()
+}
+
+func (u *Spec) GetSSOUrl() string {
+	return u.SSOStartURL
 }
 
 func (u *Spec) GetPromptProfiles(elements []string) (string, error) {

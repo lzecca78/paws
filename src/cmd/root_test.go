@@ -2,11 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/lzecca78/paws/src/config"
 	"github.com/lzecca78/paws/src/utils"
-	"github.com/spf13/afero"
-	"gopkg.in/ini.v1"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,40 +33,66 @@ func TestShouldRunDirectProfileSwitch(t *testing.T) {
 	}
 }
 
+type MockProfileHelper struct {
+	Profiles    []string
+	Chosen      string
+	SSOStartURL string
+	FileContent string
+}
+
+func (m *MockProfileHelper) GetProfiles() []string {
+	return m.Profiles
+}
+
+func (m *MockProfileHelper) GetPromptProfiles(profiles []string) (string, error) {
+	return m.Chosen, nil
+}
+
+func (m *MockProfileHelper) SetProfile(profile string) {
+	m.Chosen = profile
+}
+
+func (m *MockProfileHelper) GetSSOStartURL() error {
+	return nil
+}
+
+func (m *MockProfileHelper) WriteFile(loc string) error {
+	m.FileContent = m.Chosen
+	return nil
+}
+
+func (m *MockProfileHelper) SSOLogin() error {
+	return nil
+}
+
+func (m *MockProfileHelper) PulumiSetup() error {
+	return nil
+}
+
+func (m *MockProfileHelper) NewShellCommand(name string, args ...string) utils.IShellCommand {
+	return nil
+}
+
+func (m *MockProfileHelper) GetCallerIdentity() (config.AwsGetCallerIdentitySpec, error) {
+	return config.AwsGetCallerIdentitySpec{}, nil
+}
+
+func (m *MockProfileHelper) GetSSOUrl() string {
+	return m.SSOStartURL
+}
+
 func TestRunProfileSwitcherWithPrompt(t *testing.T) {
-	mockedFs := afero.NewMemMapFs()
-	// write a file to the mocked filesystem
-	create, err := mockedFs.Create(filepath.Join(utils.GetHomeDir(), ".aws/config"))
-	assert.NoError(t, err)
-	_, err = create.WriteString("dev")
-	assert.NoError(t, err)
-	mockLoadProfiles := func(path string) (*ini.File, error) {
-		cfg := ini.Empty()
-		_, _ = cfg.NewSection("profile dev")
-		_, _ = cfg.NewSection("profile staging")
-		return cfg, nil
+	mock := &MockProfileHelper{
+		Profiles:    []string{"dev", "staging"},
+		Chosen:      "dev",
+		SSOStartURL: "https://example.com/sso",
 	}
 
-	mockLoadSSO := func(path string) (*ini.File, error) {
-		cfg := ini.Empty()
-		section, _ := cfg.NewSection("profile dev")
-		_, _ = section.NewKey("sso_start_url", "https://example.com/sso")
-		return cfg, nil
-	}
-
-	mockPrompt := func(options []string) (string, error) {
-		return "dev", nil
-	}
-
-	result, err := runProfileSwitcherWithPrompt(mockedFs, mockPrompt, mockLoadProfiles, mockLoadSSO)
+	result, err := runProfileSwitcherWithPrompt(mock)
 	assert.NoError(t, err)
-
-	checkFileContent, err := afero.ReadFile(mockedFs, filepath.Join(utils.GetHomeDir(), ".paws"))
-
-	assert.NoError(t, err)
-	assert.Contains(t, string(checkFileContent), "dev")
 	assert.Equal(t, "dev", result.Profile)
 	assert.Equal(t, "https://example.com/sso", result.SsoStartURL)
+	assert.Equal(t, "dev", mock.FileContent)
 }
 
 type myShellCommand struct {

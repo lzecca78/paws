@@ -44,7 +44,7 @@ func Execute() {
 			Fs:                       afero.NewOsFs(),
 			AwsGetCallerIdentitySpec: config.AwsGetCallerIdentitySpec{},
 		}
-		if err := directProfileSwitch(profile, utilsSpec); err != nil {
+		if err := directProfileSwitch(profile, &utilsSpec); err != nil {
 			log.Fatal(err)
 		}
 		return
@@ -68,7 +68,7 @@ func init() {
 }
 
 func primaInitialize(helper utils.Spec) error {
-	awsProfileSpec, err := runProfileSwitcherWithPrompt(helper)
+	awsProfileSpec, err := runProfileSwitcherWithPrompt(&helper)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func primaInitialize(helper utils.Spec) error {
 }
 
 func runProfileSwitcherWithPrompt(
-	helper utils.Spec,
+	helper utils.Utils,
 ) (AwsProfileSpec, error) {
 	profiles := helper.GetProfiles()
 
@@ -108,7 +108,7 @@ func runProfileSwitcherWithPrompt(
 		return AwsProfileSpec{}, err
 	}
 
-	return AwsProfileSpec{Profile: profile, SsoStartURL: helper.SSOStartURL}, helper.WriteFile(utils.GetHomeDir())
+	return AwsProfileSpec{Profile: profile, SsoStartURL: helper.GetSSOUrl()}, helper.WriteFile(utils.GetHomeDir())
 }
 
 func shouldRunDirectProfileSwitch() bool {
@@ -118,7 +118,7 @@ func shouldRunDirectProfileSwitch() bool {
 
 func directProfileSwitch(
 	desiredProfile string,
-	helper utils.Spec,
+	helper utils.Utils,
 ) error {
 	profiles := helper.GetProfiles()
 	if utils.Contains(profiles, desiredProfile) {
