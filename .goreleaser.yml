@@ -21,6 +21,10 @@ archives:
     files:
       - LICENSE
       - README.md
+      - src: scripts/_paws
+        dst: _paws
+        info:
+          mode: 0755
 
 checksum:
   name_template: "{{ .ProjectName }}_checksums.txt"
@@ -45,3 +49,14 @@ homebrew_casks:
     repository:
         owner: lzecca78
         name: homebrew-paws
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            # replace 'foo' with the actual binary name
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/paws"]
+          end
+          system_command "/bin/ln", args: ["-sf", "#{staged_path}/_paws", "#{HOMEBREW_PREFIX}/bin/_paws"]
+        uninstall: |
+          system_command "/bin/rm", args: ["#{HOMEBREW_PREFIX}/bin/_paws"]
+

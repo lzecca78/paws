@@ -8,6 +8,29 @@ import (
 	"path/filepath"
 )
 
+func TouchFile(name string) error {
+	file, err := os.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	return file.Close()
+}
+
+func WriteFile(config, loc string) error {
+	if err := TouchFile(fmt.Sprintf("%s/.paws", GetHomeDir())); err != nil {
+		return err
+	}
+	s := []byte("")
+	if config != "default" {
+		s = []byte(config)
+	}
+	err := os.WriteFile(fmt.Sprintf("%s/.paws", loc), s, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return nil
+}
+
 func GetEnv(key, fallback string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {

@@ -9,7 +9,8 @@ paws is a command-line utility that allows you to easily switch between AWS Prof
 ## Table of Contents
 
 - [Installation](#installation)
-    - [Homebrew](#homebrew)
+    - [Hombrew](#homebrew)
+    - [Homebrew upgrade](#homebrew-upgrade)
     - [Release Binaries](#release-binaries)
 - [Usage](#usage)
     - [Pulumi configuration file](#pulumi-configuration-file)
@@ -25,6 +26,21 @@ If you are using Homebrew, you can install paws with the following command:
 ```sh
 brew tap lzecca78/paws
 brew install paws
+```
+
+Add this alias to your shell configuration file (e.g., `.bashrc`, `.zshrc`, etc.):
+
+```sh
+alias paws="source _paws"
+
+```
+This will rely on [this](./scripts/_paws) script to set up the environment variables and run the `paws` command.
+
+### Homebrew Upgrade
+If you already have paws installed via Homebrew, you can upgrade it with the following command:
+
+```sh
+brew upgrade --cask lzecca78/paws/paws
 ```
 
 > ⚠️ **macOS Gatekeeper Warning**
