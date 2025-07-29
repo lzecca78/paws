@@ -3,28 +3,29 @@ package utils
 import (
 	"fmt"
 	"github.com/radiusmethod/promptui"
+	"github.com/spf13/afero"
 	"log"
 	"os"
 	"path/filepath"
 )
 
-func TouchFile(name string) error {
-	file, err := os.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0644)
+func TouchFile(fs afero.Fs, name string) error {
+	file, err := fs.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
 	return file.Close()
 }
 
-func WriteFile(config, loc string) error {
-	if err := TouchFile(fmt.Sprintf("%s/.paws", GetHomeDir())); err != nil {
+func WriteFile(fs afero.Fs, profile, loc string) error {
+	if err := TouchFile(fs, fmt.Sprintf("%s/.paws", GetHomeDir())); err != nil {
 		return err
 	}
 	s := []byte("")
-	if config != "default" {
-		s = []byte(config)
+	if profile != "default" {
+		s = []byte(profile)
 	}
-	err := os.WriteFile(fmt.Sprintf("%s/.paws", loc), s, 0644)
+	err := afero.WriteFile(fs, fmt.Sprintf("%s/.paws", loc), s, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}

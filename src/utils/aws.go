@@ -13,7 +13,6 @@ import (
 	"gopkg.in/ini.v1"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -29,9 +28,9 @@ func LoadINIFromPath(path string) (*ini.File, error) {
 	return ini.Load(path)
 }
 
-func GetProfiles(loadFunc func(string) (*ini.File, error)) []string {
+func (u *Spec) GetAWSProfiles() []string {
 	profileFileLocation := GetCurrentProfileFile()
-	cfg, err := loadFunc(profileFileLocation)
+	cfg, err := u.Loader(profileFileLocation)
 	if err != nil {
 		log.Fatalf("Failed to load profiles: %v", err)
 	}
@@ -50,46 +49,43 @@ func GetProfiles(loadFunc func(string) (*ini.File, error)) []string {
 	return profiles
 }
 
-func GetSSOStartURLWithLoader(
-	profile string,
-	loadFunc func(string) (*ini.File, error),
-) (string, error) {
+func (u *Spec) GetSSOStart() (string, error) {
 	profileFileLocation := GetCurrentProfileFile()
-	cfg, err := loadFunc(profileFileLocation)
+	cfg, err := u.Loader(profileFileLocation)
 	if err != nil {
 		return "", fmt.Errorf("failed to load profile file: %w", err)
 	}
 
-	sectionName := fmt.Sprintf("%s %s", profilePrefix, profile)
+	sectionName := fmt.Sprintf("%s %s", profilePrefix, u.Profile)
 	section, err := cfg.GetSection(sectionName)
 	if err != nil {
-		return "", fmt.Errorf("failed to get section for profile %s: %w", profile, err)
+		return "", fmt.Errorf("failed to get section for profile %s: %w", u.Profile, err)
 	}
 
 	ssoStartURL := section.Key("sso_start_url").String()
 	if ssoStartURL == "" {
-		return "", fmt.Errorf("SSO start URL not found for profile %s", profile)
+		return "", fmt.Errorf("SSO start URL not found for profile %s", u.Profile)
 	}
 
 	return ssoStartURL, nil
 }
 
-func SSOLogin(fs afero.Fs, profile, ssoStartUri string) (awsSpec localconfig.AwsGetCallerIdentitySpec, err error) {
+func (u *Spec) SSO(ssoStartUri string) (awsSpec localconfig.AwsGetCallerIdentitySpec, err error) {
 	logger.Info("Running AWS SSO login...")
-	ok, err := IsSSOTokenValid(fs, ssoStartUri, 15)
+	ok, err := IsSSOTokenValid(u.Fs, ssoStartUri, 15)
 	if err != nil {
 		logger.Errorf("Failed to check SSO token validity: %v", err)
 	}
 	if !ok {
-		logger.Warnf("SSO token is invalid or expired for profile %s, running login...", profile)
-		awsSpec, err = RunSSOLogin(profile, true)
+		logger.Warnf("SSO token is invalid or expired for profile %s, running login...", u.Profile)
+		awsSpec, err = u.RunSSOLogin(true)
 		if err != nil {
 			logger.Errorf("Failed to run AWS SSO login: %v", err)
 			return localconfig.AwsGetCallerIdentitySpec{}, err
 		}
 	} else {
 		logger.Info("SSO token is valid, skipping login.")
-		awsSpec, err = RunSSOLogin(profile, false)
+		awsSpec, err = u.RunSSOLogin(false)
 		if err != nil {
 			logger.Errorf("Failed to run AWS SSO login: %v", err)
 			return localconfig.AwsGetCallerIdentitySpec{}, err
@@ -99,12 +95,12 @@ func SSOLogin(fs afero.Fs, profile, ssoStartUri string) (awsSpec localconfig.Aws
 	return awsSpec, nil
 }
 
-func RunSSOLogin(profile string, cli bool) (localconfig.AwsGetCallerIdentitySpec, error) {
-	logger.Infof("Running SSO login for profile: %s", profile)
+func (u *Spec) RunSSOLogin(cli bool) (localconfig.AwsGetCallerIdentitySpec, error) {
+	logger.Infof("Running SSO login for profile: %s", u.Profile)
 
 	if cli {
-		logger.Infof("Executing AWS SSO login command for profile: %s", profile)
-		command := ExecuteAwsSSOCommander(profile)
+		logger.Infof("Executing AWS SSO login command for profile: %s", u.Profile)
+		command := u.ExecuteAwsSSOCommander()
 		output, err := ExecuteAwsSSoCommand(command)
 		if err != nil {
 			logger.Errorf("Failed to execute AWS SSO command: %v\nOutput: %s", err, output)
@@ -112,19 +108,9 @@ func RunSSOLogin(profile string, cli bool) (localconfig.AwsGetCallerIdentitySpec
 		}
 	}
 
-	//	cmd := exec.Command("aws", "sso", "login", "--profile", profile)
-	//	cmd.Stdout = os.Stdout
-	//	cmd.Stderr = os.Stderr
-	//	cmd.Stdin = os.Stdin
-	//	if err := cmd.Run(); err != nil {
-	//		logger.Errorf("Failed ")
-	//		return localconfig.AwsGetCallerIdentitySpec{}, fmt.Errorf("failed to run aws sso login: %w", err)
-	//	}
-	//}
-
 	cfg, err := config.LoadDefaultConfig(
 		context.TODO(),
-		config.WithSharedConfigProfile(profile),
+		config.WithSharedConfigProfile(u.Profile),
 	)
 	if err != nil {
 		fmt.Println("error:", err)
@@ -146,7 +132,7 @@ func RunSSOLogin(profile string, cli bool) (localconfig.AwsGetCallerIdentitySpec
 	logger.Infof("UserID: %s", aws.ToString(identity.UserId))
 	logger.Infof("ARN: %s", aws.ToString(identity.Arn))
 
-	err = os.Setenv("AWS_PROFILE", profile)
+	err = os.Setenv("AWS_PROFILE", u.Profile)
 	if err != nil {
 		logger.Errorf("Failed to set AWS_PROFILE environment variable: %v", err)
 		return localconfig.AwsGetCallerIdentitySpec{}, err
@@ -160,10 +146,8 @@ func RunSSOLogin(profile string, cli bool) (localconfig.AwsGetCallerIdentitySpec
 
 }
 
-func ExecuteAwsSSOCommander(profile string) IShellCommand {
-	cmd := exec.Command("aws", "sso", "login", "--profile", profile)
-	logger.Infof("Running AWS SSO command: %s", cmd.String())
-	return &execShellCommand{Cmd: cmd}
+func (u *Spec) ExecuteAwsSSOCommander() IShellCommand {
+	return u.NewShellCommand("aws", "sso", "login", "--profile", u.Profile)
 }
 
 func ExecuteAwsSSoCommand(command IShellCommand) ([]byte, error) {

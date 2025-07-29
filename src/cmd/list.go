@@ -35,7 +35,10 @@ func init() {
 //		return nil
 //	}
 func runProfileListerToWriter(w io.Writer) error {
-	profiles := utils.GetProfiles(utils.LoadINIFromPath)
+	spec := utils.Spec{
+		Loader: utils.LoadINIFromPath,
+	}
+	profiles := spec.GetAWSProfiles()
 	for _, p := range profiles {
 		_, err := fmt.Fprintln(w, p)
 		if err != nil {
