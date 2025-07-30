@@ -22,12 +22,10 @@ var rootCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		utilsSpec := utils.Spec{
-			Loader:                   utils.LoadINIFromPath,
-			Profile:                  "",
-			Fs:                       afero.NewOsFs(),
-			AwsGetCallerIdentitySpec: config.AwsGetCallerIdentitySpec{},
+			Loader: utils.LoadINIFromPath,
+			Fs:     afero.NewOsFs(),
 		}
-		if err := primaInitialize(utilsSpec); err != nil {
+		if err := primaInitialize(&utilsSpec); err != nil {
 			log.Fatal(err)
 		}
 	},
@@ -67,13 +65,11 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.pulumi_config.yaml)")
 }
 
-func primaInitialize(helper utils.Spec) error {
-	awsProfileSpec, err := runProfileSwitcherWithPrompt(&helper)
+func primaInitialize(helper utils.Utils) error {
+	_, err := runProfileSwitcherWithPrompt(helper)
 	if err != nil {
 		return err
 	}
-	helper.SSOStartURL = awsProfileSpec.SsoStartURL
-	helper.Profile = awsProfileSpec.Profile
 	// execute aws sso login
 	err = helper.SSOLogin()
 	if err != nil {

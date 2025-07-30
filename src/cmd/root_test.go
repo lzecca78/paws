@@ -5,6 +5,7 @@ import (
 	"github.com/lzecca78/paws/src/config"
 	"github.com/lzecca78/paws/src/utils"
 	"os"
+	"os/exec"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -33,11 +34,38 @@ func TestShouldRunDirectProfileSwitch(t *testing.T) {
 	}
 }
 
+type MockShellCommand struct {
+	Name                 string
+	Args                 []string
+	Output               []byte
+	Err                  error
+	RunCalled            bool
+	CombinedOutputCalled bool
+}
+
+func (m *MockShellCommand) Run() error {
+	m.RunCalled = true
+	return m.Err
+}
+
+func (m *MockShellCommand) CombinedOutput() ([]byte, error) {
+	m.CombinedOutputCalled = true
+	if m.Err != nil {
+		return m.Output, m.Err
+	}
+	return m.Output, nil
+}
+
 type MockProfileHelper struct {
-	Profiles    []string
-	Chosen      string
-	SSOStartURL string
-	FileContent string
+	Profiles         []string
+	Chosen           string
+	SSOStartURL      string
+	FileContent      string
+	SSOStartURLError error
+	SSOLoginError    error
+	PulumiError      error
+	WriteFileError   error
+	MockCmd          *MockShellCommand
 }
 
 func (m *MockProfileHelper) GetProfiles() []string {
@@ -53,24 +81,32 @@ func (m *MockProfileHelper) SetProfile(profile string) {
 }
 
 func (m *MockProfileHelper) GetSSOStartURL() error {
-	return nil
+	return m.SSOStartURLError
 }
 
 func (m *MockProfileHelper) WriteFile(loc string) error {
+	if m.WriteFileError != nil {
+		return m.WriteFileError
+	}
 	m.FileContent = m.Chosen
 	return nil
 }
 
 func (m *MockProfileHelper) SSOLogin() error {
-	return nil
+	return m.SSOLoginError
 }
 
 func (m *MockProfileHelper) PulumiSetup() error {
-	return nil
+	return m.PulumiError
 }
 
 func (m *MockProfileHelper) NewShellCommand(name string, args ...string) utils.IShellCommand {
-	return nil
+	if m.MockCmd != nil {
+		m.MockCmd.Name = name
+		m.MockCmd.Args = args
+		return m.MockCmd
+	}
+	return &MockShellCommand{Name: name, Args: args}
 }
 
 func (m *MockProfileHelper) GetCallerIdentity() (config.AwsGetCallerIdentitySpec, error) {
@@ -95,80 +131,139 @@ func TestRunProfileSwitcherWithPrompt(t *testing.T) {
 	assert.Equal(t, "dev", mock.FileContent)
 }
 
-type myShellCommand struct {
-	CombinedOutputFunc func() ([]byte, error)
-	RunFunc            func() error
-}
+func TestDirectProfileSwitch(t *testing.T) {
+	tests := []struct {
+		name            string
+		desiredProfile  string
+		mock            *MockProfileHelper
+		mockShellOutput []byte
+		mockShellError  error
+		wantErr         bool
+		expectedErrMsg  string
+		wantProfileSet  string
+		wantFile        string
+	}{
+		{
+			name:           "successfully switches to dev",
+			desiredProfile: "dev",
+			mock: &MockProfileHelper{
+				Profiles:    []string{"dev", "staging"},
+				SSOStartURL: "https://example.com/sso",
+			},
+			mockShellOutput: []byte("OK"),
+			mockShellError:  nil,
+			wantErr:         false,
+			wantProfileSet:  "dev",
+			wantFile:        "dev",
+		},
+		{
+			name:           "profile not found",
+			desiredProfile: "prod",
+			mock: &MockProfileHelper{
+				Profiles: []string{"dev", "staging"},
+			},
+			mockShellOutput: nil,
+			mockShellError:  nil,
+			wantErr:         false,
+			wantProfileSet:  "",
+			wantFile:        "",
+		},
+		{
+			name:           "SSO start URL fails",
+			desiredProfile: "dev",
+			mock: &MockProfileHelper{
+				Profiles:         []string{"dev"},
+				SSOStartURLError: fmt.Errorf("sso error"),
+			},
+			wantErr:        true,
+			expectedErrMsg: "sso error",
+			wantProfileSet: "dev",
+			wantFile:       "",
+		},
+		{
+			name:           "SSO login fails",
+			desiredProfile: "dev",
+			mock: &MockProfileHelper{
+				Profiles:      []string{"dev"},
+				SSOLoginError: fmt.Errorf("login error"),
+			},
+			wantErr:        true,
+			expectedErrMsg: "login error",
+			wantProfileSet: "dev",
+			wantFile:       "",
+		},
+		{
+			name:           "Pulumi setup fails",
+			desiredProfile: "dev",
+			mock: &MockProfileHelper{
+				Profiles:    []string{"dev"},
+				PulumiError: fmt.Errorf("pulumi error"),
+			},
+			wantErr:        true,
+			expectedErrMsg: "pulumi error",
+			wantProfileSet: "dev",
+			wantFile:       "",
+		},
+		{
+			name:           "WriteFile fails",
+			desiredProfile: "dev",
+			mock: &MockProfileHelper{
+				Profiles:       []string{"dev"},
+				WriteFileError: fmt.Errorf("write error"),
+			},
+			wantErr:        true,
+			expectedErrMsg: "write error",
+			wantProfileSet: "dev",
+			wantFile:       "",
+		},
+		{
+			name:           "shell command fails due to missing binary",
+			desiredProfile: "dev",
+			mock: &MockProfileHelper{
+				Profiles:      []string{"dev"},
+				SSOLoginError: exec.ErrNotFound, // trigger the real error path
+			},
+			wantErr:        true,
+			expectedErrMsg: "file not found", // depends on OS
+			wantProfileSet: "dev",
+			wantFile:       "",
+		},
+		{
+			name:           "SSO login fails due to exec error",
+			desiredProfile: "dev",
+			mock: &MockProfileHelper{
+				Profiles:      []string{"dev"},
+				SSOLoginError: fmt.Errorf("exec failure: permission denied"),
+			},
+			wantErr:        true,
+			expectedErrMsg: "permission denied",
+			wantProfileSet: "dev",
+			wantFile:       "",
+		},
+	}
 
-func (sc myShellCommand) CombinedOutput() ([]byte, error) {
-	return sc.CombinedOutputFunc()
-}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.mock != nil && tt.mockShellOutput != nil || tt.mockShellError != nil {
+				tt.mock.MockCmd = &MockShellCommand{
+					Output: tt.mockShellOutput,
+					Err:    tt.mockShellError,
+				}
+			}
 
-func (sc myShellCommand) Run() error {
-	return sc.RunFunc()
-}
+			err := directProfileSwitch(tt.desiredProfile, tt.mock)
 
-type execCommandFunc func(name string, arg ...string) utils.IShellCommand
-
-func newMockShellCommanderForOutput(output string, err error) execCommandFunc {
-	return func(name string, arg ...string) utils.IShellCommand {
-		fmt.Printf("exec.Command() called with %v and %v\n", name, arg)
-		CombinedOutputFunc := func() ([]byte, error) {
-			if err == nil {
-				fmt.Println("Output obtained")
+			if tt.wantErr {
+				assert.Error(t, err)
+				if err != nil && tt.expectedErrMsg != "" {
+					assert.Contains(t, err.Error(), tt.expectedErrMsg)
+				}
 			} else {
-				fmt.Println("Failed to get Output")
+				assert.NoError(t, err)
 			}
-			return []byte(output), err
-		}
-		runFunc := func() error {
-			fmt.Printf("Run called for %v with args %v\n", name, arg)
-			if err != nil {
-				return err
-			}
-			fmt.Println("Run completed successfully")
-			return nil
-		}
-		return myShellCommand{
-			CombinedOutputFunc: CombinedOutputFunc,
-			RunFunc:            runFunc,
-		}
+
+			assert.Equal(t, tt.wantProfileSet, tt.mock.Chosen)
+			assert.Equal(t, tt.wantFile, tt.mock.FileContent)
+		})
 	}
 }
-
-//func TestDirectProfileSwitch(t *testing.T) {
-//
-//	mockFs := afero.NewMemMapFs()
-//	mockProfile := "dev"
-//
-//	// Create a mock INI file
-//	mockIni := ini.Empty()
-//	section, _ := mockIni.NewSection("profile dev")
-//	_, _ = section.NewKey("sso_start_url", "https://example.com/sso")
-//
-//	var buf bytes.Buffer
-//	_, err := mockIni.WriteTo(&buf)
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	err = afero.WriteFile(mockFs, "mock_config.ini", buf.Bytes(), 0644)
-//
-//	assert.NoError(t, err)
-//
-//	curShellCommander := utils.ExecuteAwsSSOCommander
-//
-//	// happy path:
-//	curShellCommander = newMockShellCommanderForOutput("", nil)
-//
-//	err = directProfileSwitch(mockFs, mockProfile, func(path string) (*ini.File, error) {
-//		data, err := afero.ReadFile(mockFs, "mock_config.ini")
-//		if err != nil {
-//			return nil, err
-//		}
-//		return ini.Load(data)
-//	})
-//
-//	assert.NoError(t, err)
-//	// Additional checks can be added to verify the profile switch logic
-//
-//}
