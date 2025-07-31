@@ -34,6 +34,7 @@ Add this alias to your shell configuration file (e.g., `.bashrc`, `.zshrc`, etc.
 alias paws="source _paws"
 
 ```
+This will rely on [this](./scripts/_paws) script to set up the environment variables and run the `paws` command.
 
 ### Homebrew Upgrade
 If you already have paws installed via Homebrew, you can upgrade it with the following command:
@@ -41,8 +42,6 @@ If you already have paws installed via Homebrew, you can upgrade it with the fol
 ```sh
 brew upgrade --cask lzecca78/paws/paws
 ```
-
-This will rely on [this](./scripts/_paws) script to set up the environment variables and run the `paws` command.
 
 > ⚠️ **macOS Gatekeeper Warning**
 > 

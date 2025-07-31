@@ -5,6 +5,7 @@ import (
 	"github.com/lzecca78/paws/src/config"
 	"github.com/lzecca78/paws/src/logger"
 	"github.com/lzecca78/paws/src/utils"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -20,7 +21,11 @@ var rootCmd = &cobra.Command{
 		config.InitConfig(cfgFile)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := primaInitialize(); err != nil {
+		utilsSpec := utils.Spec{
+			Loader: utils.LoadINIFromPath,
+			Fs:     afero.NewOsFs(),
+		}
+		if err := primaInitialize(&utilsSpec); err != nil {
 			log.Fatal(err)
 		}
 	},
@@ -31,7 +36,13 @@ func Execute() {
 	if shouldRunDirectProfileSwitch() {
 		profile := os.Args[1]
 		config.InitConfig(cfgFile)
-		if err := directProfileSwitch(profile); err != nil {
+		utilsSpec := utils.Spec{
+			Loader:                   utils.LoadINIFromPath,
+			Profile:                  profile,
+			Fs:                       afero.NewOsFs(),
+			AwsGetCallerIdentitySpec: config.AwsGetCallerIdentitySpec{},
+		}
+		if err := directProfileSwitch(profile, &utilsSpec); err != nil {
 			log.Fatal(err)
 		}
 		return
@@ -54,38 +65,46 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.pulumi_config.yaml)")
 }
 
-func primaInitialize() error {
-	awsProfileSpec, err := runProfileSwitcher()
+func primaInitialize(helper utils.Utils) error {
+	_, err := runProfileSwitcherWithPrompt(helper)
 	if err != nil {
 		return err
 	}
 	// execute aws sso login
-	awsSpec, err := utils.SSOLogin(awsProfileSpec.Profile, awsProfileSpec.SsoStartURL)
+	err = helper.SSOLogin()
 	if err != nil {
 		logger.Errorf("Failed to run AWS SSO login: %v", err)
 		return err
 	}
 
-	return utils.PulumiSetup(awsSpec)
+	return helper.PulumiSetup()
 }
 
-func runProfileSwitcher() (awsProfileSpec AwsProfileSpec, error error) {
-	profiles := utils.GetProfiles()
+func runProfileSwitcherWithPrompt(
+	helper utils.Utils,
+) (AwsProfileSpec, error) {
+	profiles := helper.GetProfiles()
+
 	fmt.Printf(utils.NoticeColor, "PAWS Profile Switcher\n")
-	profile, err := utils.CreatePrompt(profiles)
+	profile, err := helper.GetPromptProfiles(profiles)
 	if err != nil {
 		return AwsProfileSpec{}, err
 	}
+
+	helper.SetProfile(profile)
+
 	fmt.Printf(utils.PromptColor, "Choose a profile")
 	fmt.Printf(utils.NoticeColor, "? ")
 	fmt.Printf(utils.CyanColor, profile)
 	fmt.Println()
-	ssoStartURI, err := utils.GetSSOStartURL(profile)
+
+	err = helper.GetSSOStartURL()
 	if err != nil {
 		logger.Errorf("Failed to get SSO start URL for profile %s: %v", profile, err)
 		return AwsProfileSpec{}, err
 	}
-	return AwsProfileSpec{Profile: profile, SsoStartURL: ssoStartURI}, utils.WriteFile(profile, utils.GetHomeDir())
+
+	return AwsProfileSpec{Profile: profile, SsoStartURL: helper.GetSSOUrl()}, helper.WriteFile(utils.GetHomeDir())
 }
 
 func shouldRunDirectProfileSwitch() bool {
@@ -93,29 +112,34 @@ func shouldRunDirectProfileSwitch() bool {
 	return len(os.Args) > 1 && !utils.Contains(invalidProfiles, os.Args[1])
 }
 
-func directProfileSwitch(desiredProfile string) error {
-	profiles := utils.GetProfiles()
+func directProfileSwitch(
+	desiredProfile string,
+	helper utils.Utils,
+) error {
+	profiles := helper.GetProfiles()
 	if utils.Contains(profiles, desiredProfile) {
 		printColoredMessage("Profile ", utils.PromptColor)
 		printColoredMessage(desiredProfile, utils.CyanColor)
 		printColoredMessage(" set.\n", utils.PromptColor)
-		ssu, err := utils.GetSSOStartURL(desiredProfile)
+		helper.SetProfile(desiredProfile)
+		err := helper.GetSSOStartURL()
 		if err != nil {
 			logger.Errorf("Failed to get SSO start URL for profile %s: %v", desiredProfile, err)
 			return err
 		}
+		err = helper.SSOLogin()
 
-		awsSpec, err := utils.SSOLogin(desiredProfile, ssu)
 		if err != nil {
 			logger.Errorf("Failed to run AWS SSO login: %v", err)
 			return err
 		}
-		err = utils.PulumiSetup(awsSpec)
+		err = helper.PulumiSetup()
 		if err != nil {
 			logger.Errorf("Failed to setup Pulumi: %v", err)
 			return err
 		}
-		return utils.WriteFile(desiredProfile, utils.GetHomeDir())
+
+		return helper.WriteFile(utils.GetHomeDir())
 	}
 	printColoredMessage("WARNING: Profile ", utils.NoticeColor)
 	printColoredMessage(desiredProfile, utils.CyanColor)

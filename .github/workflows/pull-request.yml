@@ -5,7 +5,7 @@ on:
     branches: [ 'main' ]
 
 jobs:
-  lint-go:
+  lint-and-test-go:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -14,3 +14,5 @@ jobs:
           go-version: '1.24'
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
+      - name: Run tests in src/cmd
+        run: go test -v ./src/cmd
