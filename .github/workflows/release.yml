@@ -24,7 +24,7 @@ jobs:
 
   release:
     runs-on: ubuntu-24.04
-    needs: [lint]
+    needs: [lint_and_test]
 
     steps:
       - name: Check out code 🛒
