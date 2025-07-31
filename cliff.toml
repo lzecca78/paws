@@ -13,7 +13,7 @@ trim = true
 sort_commits = "oldest"
 
 [git]
-tag_pattern = "v[0-9]*"
+tag_pattern = "[0-9]*"
 commit_parsers = [
   { message = "^feat\\(.*\\):", group = "🎉 Features" },
   { message = "^fix\\(.*\\):", group = "🐛 Bug Fixes" },
@@ -25,8 +25,3 @@ commit_parsers = [
   { message = "^ci\\(.*\\):", group = "🧪 CI" },
   { message = "^chore\\(.*\\):", group = "🧹 Chores" }
 ]
-unmatched_group = "🪵 Other Changes"
-
-[remote.github]
-owner = "lzecca78"
-repo = "awsd"
