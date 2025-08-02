@@ -22,7 +22,7 @@ jobs:
         run: go test -v ./src/cmd
 
 
-  release:
+  do_release:
     runs-on: ubuntu-24.04
     needs: [lint_and_test]
 
@@ -44,10 +44,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT_PAWS }}
 
   public_changelog:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     permissions:
         contents: write
-    needs: [release]
+    needs: [do_release]
     steps:
       - uses: actions/checkout@v4
       - name: Generate a changelog
