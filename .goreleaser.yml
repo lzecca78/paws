@@ -16,7 +16,8 @@ builds:
       - '-s -w -X main.version={{.Version}}'
 
 archives:
-  - format: tar.gz
+  - formats:
+    - tar.gz
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - LICENSE
@@ -35,9 +36,6 @@ release:
     name: paws
   draft: false
   prerelease: auto
-
-changelog:
-  use: file
 
 homebrew_casks:
   - name: paws
