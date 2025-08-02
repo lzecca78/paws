@@ -35,6 +35,21 @@ jobs:
         with:
           go-version: '1.24'
 
+      - name: Run GoReleaser 🚀
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: '~> 2'
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT_PAWS }}
+
+  public_changelog:
+    runs-on: ubuntu-20.04
+    permissions:
+        contents: write
+    needs: [release]
+    steps:
+      - uses: actions/checkout@v4
       - name: Generate a changelog
         uses: orhun/git-cliff-action@v4
         with:
@@ -43,11 +58,13 @@ jobs:
         env:
           OUTPUT: CHANGELOG.md
           GITHUB_REPO: ${{ github.repository }}
-
-      - name: Run GoReleaser 🚀
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          version: '~> 2'
-          args: release --clean --release-notes=CHANGELOG.md
+      - name: Commit CHANGELOG.md to the main branch
+        run: |
+          git checkout main
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add CHANGELOG.md
+          git commit -m "Update CHANGELOG.md for release ${{ github.event.release.tag_name }}"
+          git push origin main
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT_PAWS }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
