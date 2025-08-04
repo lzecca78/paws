@@ -94,7 +94,7 @@ If you encounter any issues or have suggestions for improvements, please open an
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GPLv3 - see the [LICENSE](LICENSE) file for details.
 
 
 Inspired by https://github.com/radiusmethod/awsd
