@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	newprompt "github.com/manifoldco/promptui"
 	"github.com/spf13/afero"
@@ -91,10 +92,20 @@ func CreateNewPrompt(elements []string) (string, error) {
 		Selected: "  {{ . | cyan }}",
 	}
 
+	searcher := func(input string, index int) bool {
+		element := elements[index]
+		name := strings.Replace(strings.ToLower(element), " ", "", -1)
+		input = strings.Replace(strings.ToLower(input), " ", "", -1)
+
+		return strings.Contains(name, input)
+	}
+
 	prompt := newprompt.Select{
-		Label:     "Select an item",
-		Templates: templates,
-		Items:     elements,
+		Label:             "Select an item",
+		Templates:         templates,
+		Items:             elements,
+		Searcher:          searcher,
+		StartInSearchMode: true,
 	}
 
 	_, result, err := prompt.Run()
