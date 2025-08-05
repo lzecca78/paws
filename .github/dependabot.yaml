@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # 1. Go modules
+  - package-ecosystem: "gomod"
+    directory: "/" # Location of the go.mod file
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+
+  # 2. GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/" # GitHub workflows are in .github/workflows
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 5
