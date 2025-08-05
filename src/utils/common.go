@@ -94,8 +94,8 @@ func CreateNewPrompt(elements []string) (string, error) {
 
 	searcher := func(input string, index int) bool {
 		element := elements[index]
-		name := strings.Replace(strings.ToLower(element), " ", "", -1)
-		input = strings.Replace(strings.ToLower(input), " ", "", -1)
+		name := strings.ReplaceAll(strings.ToLower(element), " ", "")
+		input = strings.ReplaceAll(strings.ToLower(input), " ", "")
 
 		return strings.Contains(name, input)
 	}
