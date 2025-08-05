@@ -71,12 +71,49 @@ pulumi_projects:
 
 ### Switching AWS Profiles
 
-It is possible to shortcut the menu selection by passing the profile name you want to switch to as an argument.
+It is possible to shortcut the menu selection by passing the profile name you want to switch to as an argument. The cli doesn't not only switch AWS profile, but also performs lazy aws sso login
+For example, to switch to the `work` profile, you can run this in 2 different situations:
 
-```bash
-> paws work
-Profile work set.
+#### No Pulumi project detected in the current directory
+
 ```
+> paws work 
+Using config file: /Users/myuser/.pulumi_config.yaml
+Profile work.
+2025-08-05 15:29:08     INFO    Running AWS SSO login...
+2025-08-05 15:29:08     INFO    Found valid SSO token in file bcd9c51b7e770dd56a874f26dd93a5e0ffe524d7.json with expiration at 2025-08-05 14:22:50 +0000 UTC
+2025-08-05 15:29:08     INFO    SSO token is valid, skipping login.
+2025-08-05 15:29:08     INFO    Running SSO login for profile: paws
+2025-08-05 15:29:09     INFO    Account: 1234567890123
+2025-08-05 15:29:09     INFO    UserID: AO123456679:myuser@hello.com
+2025-08-05 15:29:09     INFO    ARN: arn:aws:sts::1234567890123:assumed-role/AWSReservedSSO_MyAccess_1234567890123BEFF/myuser@hello.com
+2025-08-05 15:29:09     INFO    AWS SSO login completed.
+2025-08-05 15:29:09     WARN    Pulumi.yaml file not found in current directory: /Users/luca.zecca
+```
+
+#### Pulumi project detected in the current directory
+
+```
+> paws work 
+Using config file: /Users/myuser/.pulumi_config.yaml
+Profile work set.
+2025-08-05 15:34:21     INFO    Running AWS SSO login...
+2025-08-05 15:34:21     INFO    Found valid SSO token in file bcd9c51b7e770dd56a874f26dd93a5e0ffe524d7.json with expiration at 2025-08-05 14:22:50 +0000 UTC
+2025-08-05 15:34:21     INFO    SSO token is valid, skipping login.
+2025-08-05 15:34:21     INFO    Running SSO login for profile: work
+2025-08-05 15:34:22     INFO    Account: 1234567890389
+2025-08-05 15:34:22     INFO    UserID: ARO21345678LCI:myuser@hello.com
+2025-08-05 15:34:22     INFO    ARN: arn:aws:sts::1234567890389:assumed-role/AWSReservedSSO_MyAccess_1234567890123BEFF/myuser@hello.com
+2025-08-05 15:34:22     INFO    AWS SSO login completed.
+2025-08-05 15:34:22     INFO    Pulumi bucket name for account 1234567890389: my-pulumi-state
+2025-08-05 15:34:22     INFO    Running pulumi login command: /opt/homebrew/bin/pulumi login s3://my-pulumi-state
+2025-08-05 15:34:23     INFO    Running pulumi stack command: /opt/homebrew/bin/pulumi stack ls --json
+Search: █
+Choose an element?
+  ▸ mystack
+2025-08-05 15:34:24     INFO    Running pulumi stack command: /opt/homebrew/bin/pulumi stack select mystack
+```
+
 
 To switch between different profiles files using the menu, use the following command:
 
@@ -86,7 +123,7 @@ paws
 
 This command will display a list of available profiles files in your `~/.aws/config` file or from `AWS_CONFIG_FILE`
 if you have that set. It expects for you to have named profiles in your AWS config file. Select the one you want to use.
-Furthermore, if a `Pulumi.yaml` file is detected in the current directory, it will also login to the Pulumi state and allow you to select the stack you want to work with.
+Furthermore, if a `Pulumi.yaml` file is detected in the current directory, it will also log in to the Pulumi state and allow you to select the stack you want to work with.
 
 ## Contributing
 
