@@ -2,11 +2,12 @@ package utils
 
 import (
 	"fmt"
-	"github.com/radiusmethod/promptui"
-	"github.com/spf13/afero"
 	"log"
 	"os"
 	"path/filepath"
+
+	newprompt "github.com/manifoldco/promptui"
+	"github.com/spf13/afero"
 )
 
 func TouchFile(fs afero.Fs, name string) error {
@@ -81,28 +82,28 @@ func Contains(slice []string, str string) bool {
 	return false
 }
 
-func CreatePrompt(elements []string) (string, error) {
-	prompt := promptui.Select{
-		Label:        fmt.Sprintf(PromptColor, "Choose an element"),
-		Items:        elements,
-		HideHelp:     true,
-		HideSelected: true,
-		Templates: &promptui.SelectTemplates{
-			Label:    "{{ . }}?",
-			Active:   fmt.Sprintf("%s {{ . | cyan }}", promptui.IconSelect),
-			Inactive: "  {{.}}",
-			Selected: "  {{ . | cyan }}",
-		},
-		Searcher:          NewPromptUISearcher(elements),
-		StartInSearchMode: true,
-		Stdout:            &BellSkipper{},
+func CreateNewPrompt(elements []string) (string, error) {
+
+	templates := &newprompt.SelectTemplates{
+		Label:    "{{ . | italic }}:",
+		Active:   fmt.Sprintf("%s {{ . | cyan }}", newprompt.IconSelect),
+		Inactive: "  {{.| faint }}",
+		Selected: "  {{ . | cyan }}",
+	}
+
+	prompt := newprompt.Select{
+		Label:     "Select an item",
+		Templates: templates,
+		Items:     elements,
 	}
 
 	_, result, err := prompt.Run()
 
 	if err != nil {
 		CheckError(err)
-		return "", nil
+		return "", err
 	}
+
 	return result, nil
+
 }

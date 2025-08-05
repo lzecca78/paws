@@ -2,6 +2,8 @@ package utils
 
 import (
 	"context"
+	"os/exec"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
@@ -9,7 +11,6 @@ import (
 	"github.com/lzecca78/paws/src/logger"
 	"github.com/spf13/afero"
 	"gopkg.in/ini.v1"
-	"os/exec"
 )
 
 type Utils interface {
@@ -46,7 +47,7 @@ func (u *Spec) GetSSOUrl() string {
 }
 
 func (u *Spec) GetPromptProfiles(elements []string) (string, error) {
-	return CreatePrompt(elements)
+	return CreateNewPrompt(elements)
 }
 
 func (u *Spec) GetSSOStartURL() error {
