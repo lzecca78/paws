@@ -1,4 +1,29 @@
 
+## 0.3.0 - 2025-08-06
+
+
+Full Changelog: https://github.com/lzecca78/paws/compare/0.2.4...0.3.0
+
+
+### 🎉 Features
+
+- Introduce dependabot configuration file (732dcb42663ae34f8a523429d663b9dd70b3c2b8)
+- Replaced promptui (e5226ea4bf48a1268e56daa2b1674941a214f3e4)
+- Introduce search function (090262295ad91e74e460f3f9b123a38fe4cb9b7c)
+
+### 🐛 Bug Fixes
+
+- Go.sum (93cd7d6738648d050693ca8d720115fafa5b05bf)
+- Linting (d4d146c3c5f55b187eae1631fa606b3165208c06)
+
+### 🧹 Chores
+
+- Updated README.md (bec82c661e264ef896b50a7528b140908798455f)
+- Removed renovate configuration (fb8bc7d208cdd3c6ae4f6c718b31e2a117cc41d9)
+- Improved README.md (a7618304200cf57770544cc9cafed25806b3e7aa)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (cff2bd7bc2795c3dde77c9d9d8eaa6f56675638a)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (dbf5277178e5ba0af9f129c662e725d544d7e874)
+
 ## 0.2.4 - 2025-08-02
 
 
