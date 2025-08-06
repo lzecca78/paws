@@ -2,13 +2,14 @@ package utils
 
 import (
 	"encoding/json"
+	"os"
+	"os/exec"
+	"path/filepath"
+
 	localconfig "github.com/lzecca78/paws/src/config"
 	"github.com/lzecca78/paws/src/logger"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
-	"os"
-	"os/exec"
-	"path/filepath"
 )
 
 type PulumiConfig struct {
@@ -42,7 +43,7 @@ func PulumiSetup(fs afero.Fs, awsSpec localconfig.AwsGetCallerIdentitySpec) erro
 		logger.Errorf("Failed to list Pulumi stacks: %v", err)
 	}
 	if len(stacks) > 0 {
-		stack, err := CreatePrompt(stacks)
+		stack, err := CreateNewPrompt(stacks)
 		if err != nil {
 			logger.Errorf("Failed to create prompt for stacks: %v", err)
 			return err
