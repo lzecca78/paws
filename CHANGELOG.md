@@ -1,4 +1,27 @@
 
+## 0.3.1 - 2025-10-08
+
+
+Full Changelog: https://github.com/lzecca78/paws/compare/0.3.0...0.3.1
+
+
+### 🧹 Chores
+
+- *(deps)* Bump actions/checkout from 4 to 5 (de3d90bf03d6d28da64886ff533c270de673f4c8)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2 from 1.37.2 to 1.38.0 (976b9df3eea99a9096e117971672e2d6646c9e85)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (2abb09f22c621069c9aa55f250ef6c5695ee79b2)
+- *(deps)* Bump github.com/stretchr/testify from 1.10.0 to 1.11.0 (33fc87482b9eb0dc396196dd54619c1a8ce88e31)
+- *(deps)* Bump github.com/spf13/cobra from 1.9.1 to 1.10.1 (eec456de74eaa412cc2a8073a1dd592eb0c9f038)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (2c0a591c60a685bd01d5b705e47a560b00644840)
+- *(deps)* Bump github.com/stretchr/testify from 1.11.0 to 1.11.1 (a1886ab0b64e44351c92fa9f3af8c3b1262bf515)
+- *(deps)* Bump github.com/spf13/afero from 1.14.0 to 1.15.0 (c847d1bccf3bf88ca61f3b953735522d3d4d1bd2)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2 from 1.38.3 to 1.39.0 (cce2383e4076164145023994e6d15ae170f71d20)
+- *(deps)* Bump actions/setup-go from 5 to 6 (a942ff36024eca6e079fd456ec0b25696fc35c71)
+- *(deps)* Bump github.com/spf13/viper from 1.20.1 to 1.21.0 (29c3f74080b847b07f21139aae2469c371d969eb)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (01c362eded37b9d524c83bfcc1ac44a83117bfa5)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (c62340f414999897619394dfd9232e33ec11b9d6)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (e698ecbb4373dfb95e9920767e16f3975033ef82)
+
 ## 0.3.0 - 2025-08-06
 
 
