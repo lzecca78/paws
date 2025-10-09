@@ -1,4 +1,14 @@
 
+## 0.3.2 - 2025-10-09
+
+
+Full Changelog: https://github.com/lzecca78/paws/compare/0.3.1...0.3.2
+
+
+### ♻️ Refactoring
+
+- *(time)* Now the expiration time is in local timezone, not UTC (f04647918dfba624db5e3e11e113db005fbe8a61)
+
 ## 0.3.1 - 2025-10-08
 
 
