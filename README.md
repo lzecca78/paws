@@ -31,7 +31,7 @@ brew install paws
 Add this alias to your shell configuration file (e.g., `.bashrc`, `.zshrc`, etc.):
 
 ```sh
-alias paws="source _paws"
+alias pawsd="source _paws"
 
 ```
 This will rely on [this](./scripts/_paws) script to set up the environment variables and run the `paws` command.
