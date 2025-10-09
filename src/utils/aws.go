@@ -4,6 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
@@ -11,12 +18,6 @@ import (
 	"github.com/lzecca78/paws/src/logger"
 	"github.com/spf13/afero"
 	"gopkg.in/ini.v1"
-	"log"
-	"os"
-	"path/filepath"
-	"sort"
-	"strings"
-	"time"
 )
 
 const (
@@ -203,8 +204,11 @@ func IsSSOTokenValid(fs afero.Fs, ssoStartUri string, threshold time.Duration) (
 			continue
 		}
 
+		// Convert to local time
+		localExpiresAt := expiresAt.Local()
+
 		if expiresAt.After(now.Add(threshold)) {
-			logger.Infof("Found valid SSO token in file %s with expiration at %s", entry.Name(), expiresAt)
+			logger.Infof("Found valid SSO token in file %s with expiration at %s", entry.Name(), localExpiresAt.Format(time.RFC1123))
 			return true, nil
 		}
 	}
