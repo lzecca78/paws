@@ -56,6 +56,9 @@ Move the binary to a directory in your PATH, such as `/usr/local/bin`, and make 
 chmod +x /path/to/paws
 ```
 
+⚠️ Remember to copy also the [script](./scripts/_paws) `_paws` in the same directory where you copied the binary, because the binary relies on it to set up the environment variables and run the `paws` command.
+
+
 ## Usage
 
 ### Pulumi configuration file
