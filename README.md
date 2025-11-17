@@ -44,7 +44,7 @@ brew upgrade --cask lzecca78/paws/paws
 ```
 
 > ⚠️ **macOS Gatekeeper Warning**
-> 
+>
 > The Homebrew tap is not signed, so you may need to allow it to run in your macOS security settings. If you encounter an error when trying to run the command, go to `System Preferences > Security & Privacy` and allow the app to run.
 
 
@@ -70,7 +70,7 @@ pulumi_projects:
     "0123456789012": "my-pulumi-bucket"
     "1234567890123": "my-other-pulumi-bucket"
     "234567890123": "my-third-pulumi-bucket"
-```    
+```
 
 ### Switching AWS Profiles
 
@@ -80,7 +80,7 @@ For example, to switch to the `work` profile, you can run this in 2 different si
 #### No Pulumi project detected in the current directory
 
 ```
-> paws work 
+> paws work
 Using config file: /Users/myuser/.pulumi_config.yaml
 Profile work.
 2025-08-05 15:29:08     INFO    Running AWS SSO login...
@@ -91,13 +91,13 @@ Profile work.
 2025-08-05 15:29:09     INFO    UserID: AO123456679:myuser@hello.com
 2025-08-05 15:29:09     INFO    ARN: arn:aws:sts::1234567890123:assumed-role/AWSReservedSSO_MyAccess_1234567890123BEFF/myuser@hello.com
 2025-08-05 15:29:09     INFO    AWS SSO login completed.
-2025-08-05 15:29:09     WARN    Pulumi.yaml file not found in current directory: /Users/luca.zecca
+2025-08-05 15:29:09     WARN    Pulumi.yaml file not found in current directory: /Users/myuser
 ```
 
 #### Pulumi project detected in the current directory
 
 ```
-> paws work 
+> paws work
 Using config file: /Users/myuser/.pulumi_config.yaml
 Profile work set.
 2025-08-05 15:34:21     INFO    Running AWS SSO login...
