@@ -1,4 +1,30 @@
 
+## 0.3.4 - 2026-06-08
+
+
+Full Changelog: https://github.com/lzecca78/paws/compare/0.3.3...0.3.4
+
+
+### 🧹 Chores
+
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (a3decf8958565a85c61d5cbb744a4cc0fe27701e)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (df86258671d0897f0d2f6beee1d18ee7861a18ff)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (e6f071c2a3b6e9d8920aab8a7b65d6ebed5a6cc5)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (1e34d3e720ced84e19d025d84cb4b8edb186828d)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (88113905e0ad07aea77e02e3035f01a429e69b08)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (04fc5bccf9aa178e75b87cdb49ab767ac8be9934)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (f274589612cf8aaf5bec9103a2c4fe755ef258f5)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (ac8cfacf1b8d55adc55ee4f41d6c9d29b7f043d5)
+- *(deps)* Bump gopkg.in/ini.v1 from 1.67.1 to 1.67.2 (c2f37866ffd43908451414db21a867dbdb5dc315)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (8b2f3849ac04ef0985eafff1c6991c65cd5f114c)
+- *(deps)* Bump go.uber.org/zap from 1.27.1 to 1.28.0 (831031a916d1fdf214e2ee4b63d5c785aa656b2f)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (75853e78f3d19ca363e7eb1a8ccf27e604c480bf)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (57166fb4e0c46a7bbb6be6665a24fe4903ee398a)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (f5e99f22835f8ddd654fdb80543aa52172633e44)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (0dcf693358a444fb7b2dfccbb7a60fb00f986699)
+- *(deps)* Bump gopkg.in/ini.v1 from 1.67.2 to 1.67.3 (740eda123d6fc4c954aa562222afa668b471d7fb)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (ec6c66c23fe5a08edc186b2309b6ad79a8090653)
+
 ## 0.3.3 - 2026-03-10
 
 
