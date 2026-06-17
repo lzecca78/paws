@@ -18,6 +18,13 @@ var rootCmd = &cobra.Command{
 	Short: "paws - switch between AWS profiles and Pulumi stacks.",
 	Long:  "Allows for switching AWS profiles files and Pulumi stacks.",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// Skip config loading for commands that don't need it
+		skipConfigCommands := []string{"version", "help", "completion", "list"}
+		for _, skip := range skipConfigCommands {
+			if cmd.Name() == skip {
+				return nil
+			}
+		}
 		return config.InitConfig(cfgFile)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
