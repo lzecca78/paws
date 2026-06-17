@@ -1,4 +1,20 @@
 
+## 0.3.5 - 2026-06-17
+
+
+Full Changelog: https://github.com/lzecca78/paws/compare/0.3.4...0.3.5
+
+
+### 🐛 Bug Fixes
+
+- *(pulumi)* Exclude stdout from pulumi commands (c1d6d81ef4f87541bb039543793a9aa4227b724c)
+
+### 🧹 Chores
+
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2 from 1.41.12 to 1.42.0 (6d1fbea1911b1d8856cf1625faff0fefda73cdb1)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (1fd438932454028862bfe33294565132e70bbca4)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (ef9d46858056b0d5b055f3d648450b9c7d5b3e27)
+
 ## 0.3.4 - 2026-06-08
 
 
