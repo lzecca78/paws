@@ -1,4 +1,25 @@
 
+## 0.4.0 - 2026-06-17
+
+
+Full Changelog: https://github.com/lzecca78/paws/compare/0.3.5...0.4.0
+
+
+### 🎉 Features
+
+- Refactoring of the code, added injection of version and README.md update (17845806908826746f3545ad3f38afca5a2e1bc2)
+- Upgrade golang to 1.26 (dde6c4138ecfded6136f979858232a7780b13659)
+
+### 🐛 Bug Fixes
+
+- Changed test command for all src folder (3139a9ef1d240f5ec6b1adc264b6171ad823f15c)
+- Changed test command for all src folder also in pull-request gh workflow (91d63201094610dde4b3c759abafbe2a896d73e6)
+
+### 🧹 Chores
+
+- *(lint)* Linting (3510258e771454a6b08d4478fe163c51c4eaf1f1)
+- Removed config loading where not needed (e9d8ba4203800405d8c8a0d71bf908e0608d35ea)
+
 ## 0.3.5 - 2026-06-17
 
 
