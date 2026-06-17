@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
+
 	"github.com/lzecca78/paws/src/config"
 	"github.com/lzecca78/paws/src/logger"
 	"github.com/lzecca78/paws/src/utils"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
-	"log"
-	"os"
 )
 
 var cfgFile string
@@ -17,15 +17,12 @@ var rootCmd = &cobra.Command{
 	Use:   "paws",
 	Short: "paws - switch between AWS profiles and Pulumi stacks.",
 	Long:  "Allows for switching AWS profiles files and Pulumi stacks.",
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		config.InitConfig(cfgFile)
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		return config.InitConfig(cfgFile)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		utilsSpec := utils.Spec{
-			Loader: utils.LoadINIFromPath,
-			Fs:     afero.NewOsFs(),
-		}
-		if err := primaInitialize(&utilsSpec); err != nil {
+		utilsSpec := utils.NewSpec("")
+		if err := primaInitialize(utilsSpec); err != nil {
 			log.Fatal(err)
 		}
 	},
@@ -35,14 +32,11 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	if shouldRunDirectProfileSwitch() {
 		profile := os.Args[1]
-		config.InitConfig(cfgFile)
-		utilsSpec := utils.Spec{
-			Loader:                   utils.LoadINIFromPath,
-			Profile:                  profile,
-			Fs:                       afero.NewOsFs(),
-			AwsGetCallerIdentitySpec: config.AwsGetCallerIdentitySpec{},
+		if err := config.InitConfig(cfgFile); err != nil {
+			log.Fatal(err)
 		}
-		if err := directProfileSwitch(profile, &utilsSpec); err != nil {
+		utilsSpec := utils.NewSpec(profile)
+		if err := directProfileSwitch(profile, utilsSpec); err != nil {
 			log.Fatal(err)
 		}
 		return
@@ -83,7 +77,10 @@ func primaInitialize(helper utils.Utils) error {
 func runProfileSwitcherWithPrompt(
 	helper utils.Utils,
 ) (AwsProfileSpec, error) {
-	profiles := helper.GetProfiles()
+	profiles, err := helper.GetProfiles()
+	if err != nil {
+		return AwsProfileSpec{}, err
+	}
 
 	fmt.Printf(utils.NoticeColor, "PAWS Profile Switcher\n")
 	profile, err := helper.GetPromptProfiles(profiles)
@@ -104,7 +101,12 @@ func runProfileSwitcherWithPrompt(
 		return AwsProfileSpec{}, err
 	}
 
-	return AwsProfileSpec{Profile: profile, SsoStartURL: helper.GetSSOUrl()}, helper.WriteFile(utils.GetHomeDir())
+	homeDir, err := utils.GetHomeDir()
+	if err != nil {
+		return AwsProfileSpec{}, err
+	}
+
+	return AwsProfileSpec{Profile: profile, SsoStartURL: helper.GetSSOUrl()}, helper.WriteFile(homeDir)
 }
 
 func shouldRunDirectProfileSwitch() bool {
@@ -116,7 +118,10 @@ func directProfileSwitch(
 	desiredProfile string,
 	helper utils.Utils,
 ) error {
-	profiles := helper.GetProfiles()
+	profiles, err := helper.GetProfiles()
+	if err != nil {
+		return err
+	}
 	if utils.Contains(profiles, desiredProfile) {
 		printColoredMessage("Profile ", utils.PromptColor)
 		printColoredMessage(desiredProfile, utils.CyanColor)
@@ -139,7 +144,12 @@ func directProfileSwitch(
 			return err
 		}
 
-		return helper.WriteFile(utils.GetHomeDir())
+		homeDir, err := utils.GetHomeDir()
+		if err != nil {
+			return err
+		}
+
+		return helper.WriteFile(homeDir)
 	}
 	printColoredMessage("WARNING: Profile ", utils.NoticeColor)
 	printColoredMessage(desiredProfile, utils.CyanColor)

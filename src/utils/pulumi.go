@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -90,6 +91,7 @@ func (p *PulumiConfig) s3Login() error {
 	logger.Infof("Pulumi bucket name for account %s: %s", p.AwsSpec.Account, bucketName)
 	if bucketName == "" {
 		logger.Errorf("No s3 Bucket configured for the selected AWS profile %s", os.Getenv("AWS_PROFILE"))
+		return fmt.Errorf("no s3 bucket configured for AWS profile %s", os.Getenv("AWS_PROFILE"))
 	}
 	commander := executePulumiCommander("login", "s3://"+bucketName)
 	_, err := executePulumiCommand(commander)
@@ -117,15 +119,6 @@ func (p *PulumiConfig) Stacks() ([]string, error) {
 	}
 
 	return currentStacks, nil
-}
-
-type IShellCommand interface {
-	Run() error
-	CombinedOutput() ([]byte, error)
-	Output() ([]byte, error)
-}
-type execShellCommand struct {
-	*exec.Cmd
 }
 
 func executePulumiCommander(args ...string) IShellCommand {

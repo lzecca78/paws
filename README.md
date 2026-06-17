@@ -9,12 +9,17 @@ paws is a command-line utility that allows you to easily switch between AWS Prof
 ## Table of Contents
 
 - [Installation](#installation)
-    - [Hombrew](#homebrew)
+    - [Homebrew](#homebrew)
     - [Homebrew upgrade](#homebrew-upgrade)
     - [Release Binaries](#release-binaries)
+    - [Build from Source](#build-from-source)
 - [Usage](#usage)
     - [Pulumi configuration file](#pulumi-configuration-file)
     - [Switching AWS Profiles](#switching-aws-profiles)
+- [Development](#development)
+    - [Building](#building)
+    - [Testing](#testing)
+    - [Version Management](#version-management)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -58,6 +63,23 @@ chmod +x /path/to/paws
 
 ⚠️ Remember to copy also the [script](./scripts/_paws) `_paws` in the same directory where you copied the binary, because the binary relies on it to set up the environment variables and run the `paws` command.
 
+### Build from Source
+
+To build from source, you need Go 1.21+ installed:
+
+```sh
+git clone https://github.com/lzecca78/paws.git
+cd paws
+make build
+```
+
+This will create a `paws` binary with the version automatically set from git tags.
+
+To install to your `$GOPATH/bin`:
+
+```sh
+make install
+```
 
 ## Usage
 
@@ -128,9 +150,82 @@ This command will display a list of available profiles files in your `~/.aws/con
 if you have that set. It expects for you to have named profiles in your AWS config file. Select the one you want to use.
 Furthermore, if a `Pulumi.yaml` file is detected in the current directory, it will also log in to the Pulumi state and allow you to select the stack you want to work with.
 
+### Check Version
+
+To check the installed version:
+
+```sh
+paws version
+# or
+paws v
+```
+
+## Development
+
+### Building
+
+The project uses a Makefile for common tasks:
+
+```sh
+# Build with version from git tags
+make build
+
+# Install to $GOPATH/bin
+make install
+
+# Clean build artifacts
+make clean
+
+# Show all available targets
+make help
+```
+
+### Testing
+
+```sh
+# Run all tests
+make test
+
+# Run tests with coverage
+make test-cover
+
+# Generate HTML coverage report
+make test-cover-html
+```
+
+### Version Management
+
+The version is automatically injected at build time using Go's `-ldflags`. The version is determined by:
+
+| Build Method | Version Source | Example |
+|--------------|----------------|----------|
+| `make build` | `git describe --tags` | `0.3.2-5-gabcdef-dirty` |
+| `make install` | `git describe --tags` | `0.3.2-5-gabcdef` |
+| `goreleaser` | Git tag | `v1.0.0` |
+| `go build` (no flags) | Default | `dev` |
+
+**Version format from `git describe`:**
+- `v1.0.0` — Exactly on a tag
+- `v1.0.0-5-gabcdef` — 5 commits after tag v1.0.0, at commit abcdef
+- `v1.0.0-5-gabcdef-dirty` — Same as above, with uncommitted changes
+
+**Creating a new release:**
+
+```sh
+# Tag a new version
+git tag v1.0.0
+git push --tags
+
+# Release via goreleaser (requires GITHUB_TOKEN)
+make release
+
+# Or test release locally
+make release-snapshot
+```
+
 ## Contributing
 
-If you encounter any issues or have suggestions for improvements, please open an issue or create a pull request on [GitHub](https://github.com/lzecca78/awsd).
+If you encounter any issues or have suggestions for improvements, please open an issue or create a pull request on [GitHub](https://github.com/lzecca78/paws).
 
 ## License
 

@@ -78,8 +78,8 @@ type MockProfileHelper struct {
 	MockCmd          *MockShellCommand
 }
 
-func (m *MockProfileHelper) GetProfiles() []string {
-	return m.Profiles
+func (m *MockProfileHelper) GetProfiles() ([]string, error) {
+	return m.Profiles, nil
 }
 
 func (m *MockProfileHelper) GetPromptProfiles(profiles []string) (string, error) {

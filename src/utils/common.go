@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,18 +19,18 @@ func TouchFile(fs afero.Fs, name string) error {
 }
 
 func WriteFile(fs afero.Fs, profile, loc string) error {
-	if err := TouchFile(fs, fmt.Sprintf("%s/.paws", GetHomeDir())); err != nil {
+	homeDir, err := GetHomeDir()
+	if err != nil {
+		return err
+	}
+	if err := TouchFile(fs, fmt.Sprintf("%s/.paws", homeDir)); err != nil {
 		return err
 	}
 	s := []byte("")
 	if profile != "default" {
 		s = []byte(profile)
 	}
-	err := afero.WriteFile(fs, fmt.Sprintf("%s/.paws", loc), s, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return nil
+	return afero.WriteFile(fs, fmt.Sprintf("%s/.paws", loc), s, 0644)
 }
 
 func GetEnv(key, fallback string) string {
@@ -42,27 +41,22 @@ func GetEnv(key, fallback string) string {
 	return value
 }
 
-func CheckError(err error) {
-	if err.Error() == "^D" {
-		// https://github.com/manifoldco/promptui/issues/179
-		log.Fatalf("<Del> not supported")
-	} else if err.Error() == "^C" {
-		os.Exit(1)
-	} else {
-		log.Fatal(err)
-	}
-}
-
-func GetHomeDir() string {
+func GetHomeDir() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatalf("Error getting user home directory: %v\n", err)
+		return "", fmt.Errorf("error getting user home directory: %w", err)
 	}
-	return homeDir
+	return homeDir, nil
 }
 
 func GetCurrentProfileFile() string {
-	return GetEnv("AWS_CONFIG_FILE", filepath.Join(GetHomeDir(), ".aws/config"))
+	homeDir, err := GetHomeDir()
+	if err != nil {
+		// Fall back to empty string if we can't get home directory
+		// The caller will handle the missing config file appropriately
+		return GetEnv("AWS_CONFIG_FILE", "")
+	}
+	return GetEnv("AWS_CONFIG_FILE", filepath.Join(homeDir, ".aws/config"))
 }
 
 func AppendIfNotExists(slice []string, s string) []string {
@@ -111,7 +105,6 @@ func CreateNewPrompt(elements []string) (string, error) {
 	_, result, err := prompt.Run()
 
 	if err != nil {
-		CheckError(err)
 		return "", err
 	}
 
