@@ -639,7 +639,7 @@ runtime: python
 			// Create a real temp directory for os.Getwd() to work
 			realTempDir, err := os.MkdirTemp("", "pulumi-test")
 			require.NoError(t, err)
-			defer os.RemoveAll(realTempDir)
+			defer func() { _ = os.RemoveAll(realTempDir) }()
 
 			err = os.Chdir(realTempDir)
 			require.NoError(t, err)

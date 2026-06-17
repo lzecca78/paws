@@ -119,7 +119,7 @@ func TestWriteFile(t *testing.T) {
 	// Save original HOME and restore after test
 	originalHome := os.Getenv("HOME")
 	defer func() {
-		os.Setenv("HOME", originalHome)
+		_ = os.Setenv("HOME", originalHome)
 	}()
 
 	tests := []struct {
@@ -207,7 +207,7 @@ func TestWriteFile(t *testing.T) {
 			fs := afero.NewMemMapFs()
 
 			// Set HOME environment variable
-			os.Setenv("HOME", tt.homeDir)
+			_ = os.Setenv("HOME", tt.homeDir)
 
 			if tt.setupFs != nil {
 				err := tt.setupFs(fs, tt.homeDir)
@@ -301,11 +301,11 @@ func TestGetEnv(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Clean up env before and after test
-			os.Unsetenv(tt.key)
-			defer os.Unsetenv(tt.key)
+			_ = os.Unsetenv(tt.key)
+			defer func() { _ = os.Unsetenv(tt.key) }()
 
 			if tt.setEnv {
-				os.Setenv(tt.key, tt.envValue)
+				_ = os.Setenv(tt.key, tt.envValue)
 			}
 
 			result := GetEnv(tt.key, tt.fallback)
@@ -347,11 +347,11 @@ func TestGetCurrentProfileFile(t *testing.T) {
 	originalHome := os.Getenv("HOME")
 	originalConfigFile := os.Getenv("AWS_CONFIG_FILE")
 	defer func() {
-		os.Setenv("HOME", originalHome)
+		_ = os.Setenv("HOME", originalHome)
 		if originalConfigFile != "" {
-			os.Setenv("AWS_CONFIG_FILE", originalConfigFile)
+			_ = os.Setenv("AWS_CONFIG_FILE", originalConfigFile)
 		} else {
-			os.Unsetenv("AWS_CONFIG_FILE")
+			_ = os.Unsetenv("AWS_CONFIG_FILE")
 		}
 	}()
 
@@ -388,11 +388,11 @@ func TestGetCurrentProfileFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Setenv("HOME", tt.homeDir)
+			_ = os.Setenv("HOME", tt.homeDir)
 			if tt.setConfigFile {
-				os.Setenv("AWS_CONFIG_FILE", tt.awsConfigFile)
+				_ = os.Setenv("AWS_CONFIG_FILE", tt.awsConfigFile)
 			} else {
-				os.Unsetenv("AWS_CONFIG_FILE")
+				_ = os.Unsetenv("AWS_CONFIG_FILE")
 			}
 
 			result := GetCurrentProfileFile()

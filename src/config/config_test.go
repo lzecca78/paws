@@ -28,7 +28,7 @@ func TestInitConfig(t *testing.T) {
 		// Create a temporary config file
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "test-config.yaml")
 		configContent := `
@@ -62,7 +62,7 @@ pulumi_projects:
 		// Create a temporary invalid config file
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "invalid-config.yaml")
 		invalidContent := `
@@ -82,7 +82,7 @@ this is not valid yaml: [
 
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "full-config.yaml")
 		configContent := `
@@ -117,14 +117,14 @@ custom_setting: "custom_value"
 
 		// Save original HOME and restore after test
 		originalHome := os.Getenv("HOME")
-		defer os.Setenv("HOME", originalHome)
+		defer func() { _ = os.Setenv("HOME", originalHome) }()
 
 		// Create a temporary home directory with config
 		tempHome, err := os.MkdirTemp("", "paws-home-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempHome)
+		defer func() { _ = os.RemoveAll(tempHome) }()
 
-		os.Setenv("HOME", tempHome)
+		_ = os.Setenv("HOME", tempHome)
 
 		configPath := filepath.Join(tempHome, ".pulumi_config.yaml")
 		configContent := `
@@ -146,14 +146,14 @@ pulumi_projects:
 
 		// Save original HOME and restore after test
 		originalHome := os.Getenv("HOME")
-		defer os.Setenv("HOME", originalHome)
+		defer func() { _ = os.Setenv("HOME", originalHome) }()
 
 		// Create a temporary home directory WITHOUT config
 		tempHome, err := os.MkdirTemp("", "paws-home-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempHome)
+		defer func() { _ = os.RemoveAll(tempHome) }()
 
-		os.Setenv("HOME", tempHome)
+		_ = os.Setenv("HOME", tempHome)
 
 		err = InitConfig("")
 		assert.Error(t, err)
@@ -165,7 +165,7 @@ pulumi_projects:
 
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "empty-config.yaml")
 		err = os.WriteFile(configPath, []byte(""), 0644)
@@ -181,7 +181,7 @@ pulumi_projects:
 
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "commented-config.yaml")
 		configContent := `
@@ -210,7 +210,7 @@ pulumi_projects:
 
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "env-config.yaml")
 		configContent := `
@@ -220,8 +220,8 @@ test_value: "from_file"
 		require.NoError(t, err)
 
 		// Set environment variable (viper uses uppercase with underscores)
-		os.Setenv("TEST_VALUE", "from_env")
-		defer os.Unsetenv("TEST_VALUE")
+		_ = os.Setenv("TEST_VALUE", "from_env")
+		defer func() { _ = os.Unsetenv("TEST_VALUE") }()
 
 		err = InitConfig(configPath)
 		assert.NoError(t, err)
@@ -337,7 +337,7 @@ user_id: "AROAADMINEXAMPLE:admin"
 
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "mapstructure-config.yaml")
 		configContent := `
@@ -372,7 +372,7 @@ func TestConfigFileFormats(t *testing.T) {
 
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "config.yaml")
 		configContent := `key: "yaml_value"`
@@ -389,7 +389,7 @@ func TestConfigFileFormats(t *testing.T) {
 
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "config.yml")
 		configContent := `key: "yml_value"`
@@ -412,7 +412,7 @@ func TestConfigEdgeCases(t *testing.T) {
 
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "unicode-config.yaml")
 		configContent := `
@@ -433,7 +433,7 @@ bucket_name: "my-bucket-名前"
 
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "nested-config.yaml")
 		configContent := `
@@ -456,7 +456,7 @@ level1:
 
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "array-config.yaml")
 		configContent := `
@@ -480,7 +480,7 @@ profiles:
 
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "numeric-config.yaml")
 		// Account IDs should be quoted to preserve leading zeros
@@ -505,7 +505,7 @@ pulumi_projects:
 
 		tempDir, err := os.MkdirTemp("", "paws-config-test")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() { _ = os.RemoveAll(tempDir) }()
 
 		configPath := filepath.Join(tempDir, "special-config.yaml")
 		configContent := `
@@ -536,7 +536,7 @@ func BenchmarkInitConfig(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	configPath := filepath.Join(tempDir, "bench-config.yaml")
 	configContent := `
