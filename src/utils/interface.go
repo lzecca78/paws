@@ -13,9 +13,22 @@ import (
 	"gopkg.in/ini.v1"
 )
 
+// IShellCommand is an interface for executing shell commands.
+// It is used by both aws.go and pulumi.go.
+type IShellCommand interface {
+	Run() error
+	CombinedOutput() ([]byte, error)
+	Output() ([]byte, error)
+}
+
+// execShellCommand wraps exec.Cmd to implement IShellCommand.
+type execShellCommand struct {
+	*exec.Cmd
+}
+
 type Utils interface {
 	SetProfile(profile string)
-	GetProfiles() []string
+	GetProfiles() ([]string, error)
 	GetPromptProfiles(elements []string) (string, error)
 	GetSSOStartURL() error
 	SSOLogin() error
@@ -34,11 +47,20 @@ type Spec struct {
 	SSOStartURL              string
 }
 
+// NewSpec creates a properly initialized Spec with default values for Loader and Fs.
+func NewSpec(profile string) *Spec {
+	return &Spec{
+		Loader:  LoadINIFromPath,
+		Profile: profile,
+		Fs:      afero.NewOsFs(),
+	}
+}
+
 func (u *Spec) SetProfile(profile string) {
 	u.Profile = profile
 }
 
-func (u *Spec) GetProfiles() []string {
+func (u *Spec) GetProfiles() ([]string, error) {
 	return u.GetAWSProfiles()
 }
 

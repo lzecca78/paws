@@ -1,6 +1,6 @@
 module github.com/lzecca78/paws
 
-go 1.24
+go 1.26
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.42.0
@@ -13,6 +13,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.28.0
 	gopkg.in/ini.v1 v1.67.3
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -43,5 +44,4 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

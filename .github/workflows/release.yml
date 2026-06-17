@@ -13,14 +13,13 @@ jobs:
 
       - uses: actions/setup-go@v6
         with:
-          go-version: '1.24'
+          go-version: "1.26"
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
 
-      - name: Run tests in src/cmd
-        run: go test -v ./src/cmd
-
+      - name: Run tests in src directory
+        run: go test -v ./...
 
   do_release:
     runs-on: ubuntu-24.04
@@ -33,12 +32,12 @@ jobs:
       - name: Set up Go 🧰
         uses: actions/setup-go@v6
         with:
-          go-version: '1.24'
+          go-version: "1.26"
 
       - name: Run GoReleaser 🚀
         uses: goreleaser/goreleaser-action@v7
         with:
-          version: '~> 2'
+          version: "~> 2"
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT_PAWS }}
@@ -46,7 +45,7 @@ jobs:
   public_changelog:
     runs-on: ubuntu-24.04
     permissions:
-        contents: write
+      contents: write
     needs: [do_release]
     steps:
       - uses: actions/checkout@v6

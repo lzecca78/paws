@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func InitConfig(cfgFile string) {
+func InitConfig(cfgFile string) error {
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -15,8 +15,7 @@ func InitConfig(cfgFile string) {
 		// Default config file location: $HOME/.myapp.yaml
 		home, err := os.UserHomeDir()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Could not determine home directory: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("could not determine home directory: %w", err)
 		}
 
 		viper.AddConfigPath(home)
@@ -27,9 +26,10 @@ func InitConfig(cfgFile string) {
 	// Read in environment variables that match
 	viper.AutomaticEnv()
 
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	} else {
-		fmt.Fprintf(os.Stderr, "Failed to read config: %v\n", err)
+	if err := viper.ReadInConfig(); err != nil {
+		return fmt.Errorf("failed to read config: %w", err)
 	}
+
+	fmt.Println("Using config file:", viper.ConfigFileUsed())
+	return nil
 }

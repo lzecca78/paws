@@ -13,11 +13,11 @@ builds:
     goos: [linux, darwin]
     goarch: [amd64, arm64]
     ldflags:
-      - '-s -w -X main.version={{.Version}}'
+      - "-s -w -X github.com/lzecca78/paws/src/cmd.version={{.Version}}"
 
 archives:
   - formats:
-    - tar.gz
+      - tar.gz
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - LICENSE
@@ -45,8 +45,8 @@ homebrew_casks:
       email: l.zecca78@gmail.com
     commit_msg_template: "Brew cask update for {{ .ProjectName }} version {{ .Tag }}"
     repository:
-        owner: lzecca78
-        name: homebrew-paws
+      owner: lzecca78
+      name: homebrew-paws
     hooks:
       post:
         install: |
@@ -57,4 +57,3 @@ homebrew_casks:
           system_command "/bin/ln", args: ["-sf", "#{staged_path}/_paws", "#{HOMEBREW_PREFIX}/bin/_paws"]
         uninstall: |
           system_command "/bin/rm", args: ["#{HOMEBREW_PREFIX}/bin/_paws"]
-

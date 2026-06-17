@@ -2,10 +2,13 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
-var version string = "v0.1.3"
+// version is set at build time using -ldflags
+// Example: go build -ldflags "-X github.com/lzecca78/paws/src/cmd.version=v1.0.0"
+var version = "dev"
 
 var versionCmd = &cobra.Command{
 	Use:     "version",

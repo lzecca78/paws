@@ -27,18 +27,12 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 }
 
-//	func runProfileLister() error {
-//		profiles := utils.GetProfiles()
-//		for _, p := range profiles {
-//			fmt.Println(p)
-//		}
-//		return nil
-//	}
 func runProfileListerToWriter(w io.Writer) error {
-	spec := utils.Spec{
-		Loader: utils.LoadINIFromPath,
+	spec := utils.NewSpec("") // profile not needed for listing
+	profiles, err := spec.GetAWSProfiles()
+	if err != nil {
+		return err
 	}
-	profiles := spec.GetAWSProfiles()
 	for _, p := range profiles {
 		_, err := fmt.Fprintln(w, p)
 		if err != nil {
