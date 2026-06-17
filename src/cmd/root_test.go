@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/lzecca78/paws/src/config"
-	"github.com/lzecca78/paws/src/utils"
 	"os"
 	"os/exec"
 	"testing"
+
+	"github.com/lzecca78/paws/src/config"
+	"github.com/lzecca78/paws/src/utils"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -37,10 +38,11 @@ func TestShouldRunDirectProfileSwitch(t *testing.T) {
 type MockShellCommand struct {
 	Name                 string
 	Args                 []string
-	Output               []byte
+	OutputData           []byte
 	Err                  error
 	RunCalled            bool
 	CombinedOutputCalled bool
+	OutputCalled         bool
 }
 
 func (m *MockShellCommand) Run() error {
@@ -51,9 +53,17 @@ func (m *MockShellCommand) Run() error {
 func (m *MockShellCommand) CombinedOutput() ([]byte, error) {
 	m.CombinedOutputCalled = true
 	if m.Err != nil {
-		return m.Output, m.Err
+		return m.OutputData, m.Err
 	}
-	return m.Output, nil
+	return m.OutputData, nil
+}
+
+func (m *MockShellCommand) Output() ([]byte, error) {
+	m.OutputCalled = true
+	if m.Err != nil {
+		return m.OutputData, m.Err
+	}
+	return m.OutputData, nil
 }
 
 type MockProfileHelper struct {
@@ -246,8 +256,8 @@ func TestDirectProfileSwitch(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.mock != nil && tt.mockShellOutput != nil || tt.mockShellError != nil {
 				tt.mock.MockCmd = &MockShellCommand{
-					Output: tt.mockShellOutput,
-					Err:    tt.mockShellError,
+					OutputData: tt.mockShellOutput,
+					Err:        tt.mockShellError,
 				}
 			}
 

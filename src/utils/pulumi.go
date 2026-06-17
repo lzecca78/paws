@@ -122,6 +122,7 @@ func (p *PulumiConfig) Stacks() ([]string, error) {
 type IShellCommand interface {
 	Run() error
 	CombinedOutput() ([]byte, error)
+	Output() ([]byte, error)
 }
 type execShellCommand struct {
 	*exec.Cmd
@@ -142,7 +143,7 @@ func executePulumiCommander(args ...string) IShellCommand {
 func executePulumiCommand(command IShellCommand) ([]byte, error) {
 
 	// Run the command and capture the output
-	output, err := command.CombinedOutput()
+	output, err := command.Output()
 	if err != nil {
 		logger.Errorf("Error running pulumi command: %v\nOutput: %s", err, output)
 		return nil, err
