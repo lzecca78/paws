@@ -3,7 +3,7 @@ module github.com/lzecca78/paws
 go 1.26
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.43.2
+	github.com/aws/aws-sdk-go-v2 v1.43.4
 	github.com/aws/aws-sdk-go-v2/config v1.32.33
 	github.com/aws/aws-sdk-go-v2/service/sts v1.45.2
 	github.com/manifoldco/promptui v0.9.0
@@ -27,7 +27,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/signin v1.5.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.33.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.38.2 // indirect
-	github.com/aws/smithy-go v1.27.5 // indirect
+	github.com/aws/smithy-go v1.27.6 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
