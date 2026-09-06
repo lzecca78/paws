@@ -39,7 +39,7 @@ release:
 
 homebrew_casks:
   - name: paws
-    binary: paws
+    binaries: [paws]
     commit_author:
       name: lzecca78
       email: l.zecca78@gmail.com
@@ -51,7 +51,7 @@ homebrew_casks:
       post:
         install: |
           if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
-            # replace 'foo' with the actual binary name
+            # remove quarantine attribute so macOS Gatekeeper allows the binary to run
             system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/paws"]
           end
           system_command "/bin/ln", args: ["-sf", "#{staged_path}/_paws", "#{HOMEBREW_PREFIX}/bin/_paws"]
