@@ -1,4 +1,36 @@
 
+## 0.4.1 - 2026-09-06
+
+
+Full Changelog: https://github.com/lzecca78/paws/compare/0.4.0...0.4.1
+
+
+### 🐛 Bug Fixes
+
+- *(goreleaser)* Change binary to binaries (cb7c5da5c73c9a869f988c582207add6feff8995)
+
+### 🧹 Chores
+
+- *(deps)* Bump actions/checkout from 6 to 7 (0769a87619f78a65efec2660f588456af00dfe06)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (bc0260dd541d7223277d59f3cdb60449d2da8dcd)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (a04d52d351599ca6ba618e64bcaae9d16295519f)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (05f38b36bcc44743295c8fa681f3f59440c544ba)
+- *(deps)* Bump actions/setup-go from 6 to 7 (907c3e6f101457732e25a91065161b5ec6c10aa5)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (0ab2431ab24ebf3b8d0b40edfabe6b8c09bce959)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (19abf747a4a9f1778df6a074b19198f028c4f292)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (3602ac81fd1bf20bd92d00b0733e015cb78ffa82)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (37fbab0ad6b7dbfc2fbe7660fda2fc1992a23ddb)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (d9048a7780614a569c1ec130763f13b21c47ed8a)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2 from 1.43.2 to 1.43.4 (68a244aa60cfb8649fd260d3dc536c1174d22b32)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (9e4331b40451fc81e9bb5e753d618108b2948367)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (c42f6aab1694506fa54c447bb5ed4c00e7f7857e)
+- *(deps)* Bump github.com/stretchr/testify from 1.11.1 to 1.12.1 (5df2b8bcb8581674a5d47f21362bceea5cb3c2ca)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (af8aab89fc207e7b4378aab840e71c4333e04409)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (654dbf701582173dc9c660279e33bbbcb52df0da)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2 from 1.43.7 to 1.45.1 (0fea8d2efe8f3b8f0f9856a8b2f3cea5485d10f6)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/service/sts (b37ca107947b629cbb1bc7a46c54831893aa77c6)
+- *(deps)* Bump github.com/aws/aws-sdk-go-v2/config (6dd8f37b041efa252a4051233348bd8ef629e276)
+
 ## 0.4.0 - 2026-06-17
 
 
@@ -212,11 +244,14 @@ Full Changelog: https://github.com/lzecca78/paws/compare/0.1.7...0.2.0
 
 ### 🐛 Bug Fixes
 
+- Linting (1ced7e0c32bfbb69e242fd8693d282a340084652)
 - Tests (96e3cd2a27518cd68df5c6ebde9888afcbb22454)
 - Job dependency in release gha (4de9de47ae20cffc5245981de87bb9dd999d6d8d)
 
 ### 🧹 Chores
 
+- Introduced new tests and added a github action for launching tests (eba70c047684847791fb5cc1d81d338575b462b3)
+- Wip (1c767a4b0e7711a7586005a70aa6f724156b3cc8)
 - Wip refactoring for tests (b3ad7c6ea6309bc8810a22d53963b745056df906)
 - Fixing existing tests (dd97be4d6c7b5141078f9e797aaf449c83780a1f)
 - Improved gh actions (027cca068324a010cc84e07216afd87d868a5633)
@@ -250,15 +285,9 @@ Full Changelog: https://github.com/lzecca78/paws/compare/0.1.5...0.1.6
 Full Changelog: https://github.com/lzecca78/paws/compare/0.1.4...0.1.5
 
 
-### 🐛 Bug Fixes
-
-- Linting (1ced7e0c32bfbb69e242fd8693d282a340084652)
-
 ### 🧹 Chores
 
 - Improved readme (8fa74c71c8485e262047c5c2b401b80897c3e7c5)
-- Introduced new tests and added a github action for launching tests (eba70c047684847791fb5cc1d81d338575b462b3)
-- Wip (1c767a4b0e7711a7586005a70aa6f724156b3cc8)
 - Added wrapper script (aa4a85d5e8aa1c9822738216fb3ae6592d65dab6)
 
 ## 0.1.4 - 2025-07-27
