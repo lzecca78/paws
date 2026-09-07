@@ -3,7 +3,7 @@ module github.com/lzecca78/paws
 go 1.26
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.45.1
+	github.com/aws/aws-sdk-go-v2 v1.46.0
 	github.com/aws/aws-sdk-go-v2/config v1.33.1
 	github.com/aws/aws-sdk-go-v2/service/sts v1.47.1
 	github.com/manifoldco/promptui v0.9.0
