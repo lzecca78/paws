@@ -12,7 +12,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/zap v1.28.0
-	gopkg.in/ini.v1 v1.67.3
+	gopkg.in/ini.v1 v1.68.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
